@@ -1,6 +1,8 @@
 version: "3.9"
+
 services:
   express:
+    container_name: express
     build:
       context: ./
       target: ${TARGET_STAGE:-development}
@@ -14,3 +16,20 @@ services:
       - /usr/src/app/node_modules
     env_file:
       - .env.dev
+    depends_on:
+      - db
+    networks:
+      - express-gateway-network
+  db:
+    container_name: postgres
+    image: "postgres:alpine"
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env.dev
+    networks:
+      - express-gateway-network
+networks:
+  express-gateway-network:
+    driver: bridge
+

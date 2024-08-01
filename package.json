@@ -1,7 +1,7 @@
 {
   "name": "express-api-gateway-2",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "start": "node dist/index.js",
     "build": "tsc",
@@ -14,11 +14,16 @@
   "description": "",
   "dependencies": {
     "dotenv": "^16.4.5",
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "knex": "^3.1.0",
+    "pg": "^8.12.0",
+    "winston": "^3.13.1",
+    "winston-daily-rotate-file": "^5.0.0"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",
     "@types/node": "^22.0.2",
+    "ts-node": "^10.9.2",
     "tsx": "^4.16.5",
     "typescript": "^5.5.4"
   }
