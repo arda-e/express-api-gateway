@@ -8,7 +8,7 @@ COPY . .
 
 # Stage 2: Development Stage
 FROM base AS development
-RUN npm install -g nodemon
+RUN npm install -g tsx
 ENV NODE_ENV=development
 EXPOSE 8000 9229
-CMD ["nodemon", "--inspect=0.0.0.0:9229", "src/index.js"]
+CMD ["tsx", "watch", "--inspect=0.0.0.0:9229", "src/index.ts"]
