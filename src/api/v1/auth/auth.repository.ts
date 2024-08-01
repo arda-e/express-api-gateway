@@ -1,6 +1,8 @@
+import { injectable } from 'tsyringe';
 import User from './auth.model';
-import { KnexRepository } from "../../../utils/Repository";
+import { KnexRepository } from "@utils/Repository";
 
+@injectable()
 class AuthRepository extends KnexRepository<User> {
     constructor() {
         super();

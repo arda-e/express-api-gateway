@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import Model from '../../../utils/Model'; //TODO: Introduce @imports
+import Model from '@utils/Model';
 
 class User extends Model {
     username: string;

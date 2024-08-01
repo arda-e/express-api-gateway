@@ -1,12 +1,11 @@
-import { Service, Inject } from "typedi";
+import { injectable, inject } from 'tsyringe';
 import AuthRepository from "./Auth.repository";
 import User from "./Auth.model";
 
-// @Service()
+@injectable()
 class AuthService {
     constructor(
-        // @Inject()
-        private authRepository: AuthRepository
+        @inject(AuthRepository) private authRepository: AuthRepository
     ) {}
 
     async register(

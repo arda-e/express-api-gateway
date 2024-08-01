@@ -1,5 +1,5 @@
 import knex, { Knex } from 'knex';
-import knexConfig from '../config/knexfile';
+import knexConfig from '@config/knexfile';
 import DbAdapter from './db.adapter';
 
 const environment = process.env.NODE_ENV || 'development';

@@ -14,7 +14,8 @@ class LoggerFactory {
 
     private static createDevLogger(): Logger {
         return createLogger({
-            level: process.env.LOG_LEVEL || 'debug',
+            level: process.env.LOG_LEVEL || 'd' +
+                'ebug',
             format: format.combine(
                 format.colorize(),
                 format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),

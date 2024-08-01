@@ -1,5 +1,5 @@
 import { Database } from './db.interface';
-import Logger from '../utils/Logger';
+import Logger from '@utils/Logger';
 
 const logger = Logger.getLogger();
 

@@ -13,7 +13,13 @@
     "resolveJsonModule": true,
     "noImplicitAny": true,
     "strictPropertyInitialization": false,
-    "typeRoots": ["./node_modules/@types", "./src/types"]
+    "typeRoots": ["./node_modules/@types", "./src/types"],
+    "baseUrl": "./src",
+    "paths": {
+      "@utils/*": ["utils/*"],
+      "@api/*": ["api/*"],
+      "@config/*": ["config/*"]
+    }
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules"]

@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 
 import Logger from "./utils/Logger"
 import { createDatabase } from "./db";

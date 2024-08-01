@@ -1,9 +1,8 @@
 import { Request, Response } from 'express';
+import { container } from 'tsyringe';
 import AuthService from './auth.service';
-import AuthRepository from './auth.repository';
 
-const authRepository = new AuthRepository();
-const authService = new AuthService(authRepository);
+const authService = container.resolve(AuthService);
 
 export const register = async (req: Request, res: Response): Promise<void> => {
     const { username, email, password } = req.body;
