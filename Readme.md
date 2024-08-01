@@ -1,3 +1,11 @@
+### Dev
+For building dev environment
+```
+docker-compose -f docker-compose.dev.yml --env-file .env.dev up --build
+```
 
-docker build -t express-api-gateway-2 .     
-docker run -p 8000:8000 express-api-gateway-2
+### Prod
+For building prod environment
+``` 
+docker-compose -f docker-compose.prod.yml --env-file .env.prod up --build
+```

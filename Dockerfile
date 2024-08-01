@@ -12,3 +12,12 @@ RUN npm install -g tsx
 ENV NODE_ENV=development
 EXPOSE 8000 9229
 CMD ["tsx", "watch", "--inspect=0.0.0.0:9229", "src/index.ts"]
+
+# Stage 3: Production Stage
+FROM base AS production
+ENV NODE_ENV=production
+RUN npm run build
+COPY . .
+EXPOSE 8000
+
+CMD ["node", "dist/index.js"]

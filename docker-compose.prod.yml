@@ -1,0 +1,12 @@
+version: "3.9"
+services:
+  express:
+    build:
+      context: ./
+      target: ${TARGET_STAGE:-production}
+      args:
+        NODE_ENV: ${NODE_ENV:-development}
+    ports:
+      - "${PORT:-80}:${PORT:-80}"
+    env_file:
+      - .env.prod
