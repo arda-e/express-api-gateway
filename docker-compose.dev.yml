@@ -1,0 +1,14 @@
+version: "3.9"
+services:
+  express:
+    build:
+      context: ./
+      target: ${TARGET_STAGE:-development}
+      args:
+        NODE_ENV: ${NODE_ENV:-development}
+    ports:
+      - "${DEV_PORT:-80}:${DEV_PORT:-80}"
+      - "${DEV_DEBUG_PORT:-9229}:${DEV_DEBUG_PORT:-9229}"
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
