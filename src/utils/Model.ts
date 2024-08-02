@@ -12,7 +12,7 @@ abstract class BaseModel {
     created_at: Date;
     updated_at: Date;
 
-    protected constructor(id: number, created_at: Date, updated_at: Date) {
+    protected constructor(id: number) {
         this.id = id;
         this.created_at = new Date();
         this.updated_at = new Date();

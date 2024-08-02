@@ -20,7 +20,7 @@ abstract class DbAdapter<T> implements Database {
 
 
     protected abstract createInstance(): T;
-    protected abstract testConnection(): Promise<void>;
+    protected abstract testConnection(): Promise<void>; // TODO: Check if it should return a boolean
     /**
      * Method to execute a query on the database.
      * Must be implemented by subclasses.
