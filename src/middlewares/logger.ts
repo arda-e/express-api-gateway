@@ -10,8 +10,8 @@ const logger = Logger.getLogger();
  * @param next - The Express next middleware function.
  */
 const loggerMiddleware = (req: Request, res: Response, next: NextFunction) => {
-    logger.info(`${req.method} ${req.url}`);
-    next();
+  logger.info(`${req.method} ${req.url}`);
+  next();
 };
 
 export default loggerMiddleware;

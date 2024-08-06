@@ -1,9 +1,9 @@
 export class Link {
-    href: string;
-    method?: string;
+  href: string;
+  method?: string;
 
-    constructor(href: string, method?: string) {
-        this.href = href;
-        this.method = method;
-    }
+  constructor(href: string, method?: string) {
+    this.href = href;
+    this.method = method;
+  }
 }

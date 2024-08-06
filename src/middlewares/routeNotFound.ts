@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { ErrorResponse } from '@utils/responses/error/ErrorResponse';
-import {RouteNotFoundError} from "@utils/errors";
+import { RouteNotFoundError } from '@utils/errors';
 
 /**
  * @name routeNotFound
@@ -15,10 +15,10 @@ import {RouteNotFoundError} from "@utils/errors";
  * @throws {Error} If the route is not found.
  */
 export default function routeNotFound(
-    req: Request,
-    res: Response<ErrorResponse>,
-    next: NextFunction,
+  req: Request,
+  res: Response<ErrorResponse>,
+  next: NextFunction,
 ): void {
-    const error = new RouteNotFoundError(`🔍 - Not Found - ${req.originalUrl}`);
-    next(error);
+  const error = new RouteNotFoundError(`🔍 - Not Found - ${req.originalUrl}`);
+  next(error);
 }

@@ -8,15 +8,15 @@
  * @property {Date} updated_at - The date and time the model instance was last updated.
  */
 abstract class BaseModel {
-    id: number;
-    created_at: Date;
-    updated_at: Date;
+  id: number;
+  created_at: Date;
+  updated_at: Date;
 
-    protected constructor(id: number) {
-        this.id = id;
-        this.created_at = new Date();
-        this.updated_at = new Date();
-    }
+  protected constructor(id: number) {
+    this.id = id;
+    this.created_at = new Date();
+    this.updated_at = new Date();
+  }
 }
 
 export default BaseModel;

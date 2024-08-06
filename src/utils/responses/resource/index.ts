@@ -1,3 +1,3 @@
-export * from './Link'
-export * from './Resource'
-export * from './ResourceLink'
+export * from './Link';
+export * from './Resource';
+export * from './ResourceLink';

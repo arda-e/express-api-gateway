@@ -1,51 +1,40 @@
 import { injectable, inject } from 'tsyringe';
-import AuthRepository from "./Auth.repository";
-import User from "./Auth.model";
-import { ResourceDoesNotExistError } from "@utils/errors";
-import { UserAlreadyExistsError } from "./errors/UserAlreadyExistsError";
+import { ResourceDoesNotExistError } from '@utils/errors';
 
+import AuthRepository from './Auth.repository';
+import User from './Auth.model';
+import { UserAlreadyExistsError } from './errors/UserAlreadyExistsError';
 
 @injectable()
 class AuthService {
-    constructor(
-        @inject(AuthRepository) private authRepository: AuthRepository
-    ) {}
+  constructor(@inject(AuthRepository) private authRepository: AuthRepository) {}
 
-    async register(
-        username: string,
-        email: string,
-        password: string
-    ): Promise<User> {
-        const existingUser = await this.authRepository.findByEmail(email);
+  async register(username: string, email: string, password: string): Promise<User> {
+    const existingUser = await this.authRepository.findByEmail(email);
 
-        if (existingUser) {
-            throw new UserAlreadyExistsError("User already exists");
-        }
-
-        return await this.authRepository.createUser(
-            username,
-            email,
-            password
-        );
-
+    if (existingUser) {
+      throw new UserAlreadyExistsError('User already exists');
     }
 
-    async login(email: string, password: string): Promise<User> {
-        const user = await this.authRepository.findByEmail(email);
+    return await this.authRepository.createUser(username, email, password);
+  }
 
-        if (!user) {
-            throw new ResourceDoesNotExistError("User not found");
-        }
+  async login(email: string, password: string): Promise<User> {
+    const user = await this.authRepository.findByEmail(email);
 
-        return user;
+    if (!user) {
+      throw new ResourceDoesNotExistError('User not found');
     }
-    async deleteUser(id: number): Promise<boolean> {
-            const user = await this.authRepository.findById(id);
-            if (!user) {
-                throw new ResourceDoesNotExistError("User not found");
-            }
-            return await this.authRepository.deleteById(id);
+
+    return user;
+  }
+  async deleteUser(id: number): Promise<boolean> {
+    const user = await this.authRepository.findById(id);
+    if (!user) {
+      throw new ResourceDoesNotExistError('User not found');
     }
+    return await this.authRepository.deleteById(id);
+  }
 }
 
 export default AuthService;

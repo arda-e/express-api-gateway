@@ -14,7 +14,7 @@
     "noImplicitAny": true,
     "strictPropertyInitialization": false,
     "typeRoots": ["./node_modules/@types", "./src/types"],
-    "types": ["node","jest"],
+    "types": ["node", "jest"],
     "baseUrl": "./src",
     "paths": {
       "@utils/*": ["utils/*"],

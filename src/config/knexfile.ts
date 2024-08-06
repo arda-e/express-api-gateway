@@ -1,5 +1,6 @@
-import type { Knex } from "knex";
-const dotenv = require("dotenv");
+import type { Knex } from 'knex';
+
+const dotenv = require('dotenv');
 
 dotenv.config();
 
@@ -10,7 +11,7 @@ const config: { [key: string]: Knex.Config } = {
       host: process.env.POSTGRES_HOST,
       user: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
-      database: process.env.POSTGRES_DB
+      database: process.env.POSTGRES_DB,
     },
     migrations: {
       directory: '../migrations',
@@ -23,7 +24,7 @@ const config: { [key: string]: Knex.Config } = {
       host: process.env.POSTGRES_HOST,
       user: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
-      database: process.env.POSTGRES_DB
+      database: process.env.POSTGRES_DB,
     },
     migrations: {
       directory: './dist/migrations',
@@ -32,4 +33,4 @@ const config: { [key: string]: Knex.Config } = {
   },
 };
 
-export default config
+export default config;
