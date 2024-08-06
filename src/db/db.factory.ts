@@ -26,11 +26,11 @@ type DatabaseConstructor = new (maxRetries: number, retryDelay: number) => Datab
  * @returns An instance of a class that implements the Database interface.
  */
 const createDatabase = (
-    AdapterClass: DatabaseConstructor = KnexAdapter,
-    maxRetries = 5,
-    retryDelay = 1000
-): Database => {
+            AdapterClass: DatabaseConstructor = KnexAdapter,
+            maxRetries = 5,
+            retryDelay = 1000
 
+): Database => {
         try {
                 return new AdapterClass(maxRetries, retryDelay);
         } catch (error) {

@@ -6,8 +6,8 @@ class User extends Model {
     email: string;
     password: string;
 
-    constructor(id: number, username: string, email: string, password: string, created_at: Date, updated_at: Date) {
-        super(id, created_at, updated_at);
+    constructor(id: number, username: string, email: string, password: string) {
+        super(id);
         this.username = username;
         this.email = email;
         this.password = password;
@@ -23,3 +23,4 @@ class User extends Model {
 }
 
 export default User;
+

@@ -1,29 +1,27 @@
-import { Request, Response } from 'express';
+import {NextFunction, Request, Response} from 'express';
 import { container } from 'tsyringe';
 import AuthService from './auth.service';
+import { ResponseFactory } from "@utils/responses/ResponseFactory";
 
 const authService = container.resolve(AuthService);
-
-export const register = async (req: Request, res: Response): Promise<void> => {
-    const { username, email, password } = req.body;
+export const register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const user = await authService.register(username, email, password);
-        res.status(201).json(user);
+        const { username, email, password } = req.body;
+        const user = await authService.register( username, email, password );
+        const [status, response] = ResponseFactory.createResource(user, '/api/v1/auth');
+        res.status(status).json(response);
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        next(error);
     }
 };
 
-export const login = async (req: Request, res: Response): Promise<void> => {
+export const login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const { email, password } = req.body;
     try {
         const user = await authService.login(email, password);
-        res.status(200).json(user);
+        const [status, response] = ResponseFactory.getSingleResource(user, '/api/v1/auth');
+        res.status(status).json(response);
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        next(error)
     }
-};
-
-export const getUser = (req: Request, res: Response): void => {
-    res.send('User!');
 };
