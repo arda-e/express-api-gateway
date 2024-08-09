@@ -80,55 +80,84 @@ class SessionManager {
     return this.redisClient;
   }
 
-  /**
-   * Initializes the Redis client connection for the SessionManager.
-   * This method creates a new Redis client connection, connects to the Redis server, and sets a timeout for the connection.
-   * If the connection is not established within the specified timeout, an error is thrown.
-   *
-   * @param {number} [timeout=5000] - The timeout in milliseconds for the Redis connection.
-   * @returns {Promise<void>} A Promise that resolves when the Redis client is connected, or rejects with an error if the connection fails.
-   * @throws {Error} If the Redis connection fails to be established within the specified timeout.
-   */
+  public getSessionMiddleware(): RequestHandler {
+    return this.sessionMiddleware;
+  }
 
-  private async initRedisClient(timeout: number = 5000): Promise<void> {
+  /**
+   * Initializes the Redis client used by the SessionManager.
+   * This method attempts to connect to the Redis server with the configured URL, and retries up to the specified number of times if the connection fails.
+   * @param timeout - The timeout in milliseconds for the Redis connection attempt.
+   * @param maxRetries - The maximum number of retries to attempt if the connection fails.
+   * @throws {Error} If the connection to Redis fails after the maximum number of retries.
+   */
+  private async initRedisClient(timeout: number = 5000, maxRetries: number = 5): Promise<void> {
     this.redisClient = createClient({
       // url: `redis://${Config.app.session.redis.host}:${Config.app.session.redis.port}`,
       url: 'redis://redis:6379',
     });
+    let attempts = 0;
 
-    this.redisClient.connect();
-
-    let connectionTimeout: NodeJS.Timeout;
-
-    /**
-     * Creates a Promise that rejects with a timeout error if the Redis connection is not established within the specified timeout.
-     * @param {number} timeout - The timeout in milliseconds for the Redis connection.
-     * @returns {Promise<void>} A Promise that resolves when the Redis connection is established, or rejects with a timeout error if the connection fails.
-     */
-    const timeoutPromise = new Promise<void>((_, reject) => {
-      connectionTimeout = setTimeout(() => {
-        reject(new Error(`Redis connection timed out after ${timeout} ms`));
-      }, timeout) as NodeJS.Timeout;
-    });
-
-    const connectPromise = new Promise<void>((resolve, reject) => {
-      this.redisClient.on('connect', () => {
-        clearTimeout(connectionTimeout);
-        resolve();
-      });
-
-      this.redisClient.on('error', (err) => {
-        clearTimeout(connectionTimeout);
-        reject(err);
-      });
-    });
-
-    //TODO?: Should i included maximum number of retries?
-    try {
-      await Promise.race([timeoutPromise, connectPromise]);
-    } catch (err) {
-      throw new Error(`Failed to connect to Redis: ${err.message}`);
+    while (attempts < maxRetries) {
+      try {
+        await this.connectWithTimeout(timeout);
+        return;
+      } catch (err) {
+        attempts += 1;
+        SessionManager.logger.error(
+          `Failed to connect to Redis (attempt ${attempts}/${maxRetries}): ${err.message}`,
+        );
+        if (attempts >= maxRetries) {
+          throw new Error(
+            `Failed to connect to Redis after ${maxRetries} attempts: ${err.message}`,
+          );
+        }
+      }
     }
+  }
+
+  /**
+   * Connects to the Redis server with a timeout.
+   * This method creates a new Promise that resolves when the Redis connection is established, or rejects with an error if the connection times out.
+   * @param timeout - The timeout in milliseconds for the Redis connection attempt.
+   * @returns A Promise that resolves when the Redis connection is established, or rejects with an error if the connection times out.
+   */
+  private connectWithTimeout(timeout: number): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      let connectionTimeout: NodeJS.Timeout;
+
+      // A Promise that rejects after the specified timeout
+      const timeoutPromise = new Promise<void>((_, reject) => {
+        connectionTimeout = setTimeout(() => {
+          reject(new Error(`Redis connection timed out after ${timeout} ms`));
+        }, timeout) as NodeJS.Timeout;
+      });
+
+      // Redis client connection and event listeners
+      /*-*/
+      this.redisClient.connect();
+
+      const connectPromise = new Promise<void>((resolve, reject) => {
+        this.redisClient.on('connect', () => {
+          clearTimeout(connectionTimeout);
+          resolve();
+        });
+
+        this.redisClient.on('error', (err) => {
+          clearTimeout(connectionTimeout);
+          reject(err);
+        });
+      });
+      /*-*/
+
+      // Ensure the connection resolves or rejects based on the first completed promise
+      Promise.race([timeoutPromise, connectPromise]).then(resolve).catch(reject);
+    });
+  }
+
+  private cleanupRedisClient(): void {
+    this.redisClient.removeAllListeners('connect');
+    this.redisClient.removeAllListeners('error');
   }
 
   /**
@@ -142,12 +171,12 @@ class SessionManager {
     }
 
     if (SessionManager.instance.redisClient) {
+      await SessionManager.instance.cleanupRedisClient();
       await SessionManager.instance.redisClient.quit();
       SessionManager.logger.info('Redis client disconnected.');
     } else {
       SessionManager.logger.warn('Redis client not initialized. Skipping disconnection.');
     }
-
     SessionManager.instance = null;
     SessionManager.logger.info('Session instance destroyed');
   }

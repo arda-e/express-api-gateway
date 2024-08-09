@@ -10,7 +10,7 @@ app.use(express.json());
 app.use(middlewares.logger);
 
 const sessionConfig = SessionConfig.getInstance();
-app.use(sessionConfig.getSessionMiddleware());
+app.use(sessionConfig.getSessionMiddleware);
 
 app.get('/', (req, res) => {
   res.status(200).json('Welcome to the API Gateway!');
