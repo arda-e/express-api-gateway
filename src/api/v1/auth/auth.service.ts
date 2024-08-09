@@ -26,6 +26,12 @@ class AuthService {
       throw new ResourceDoesNotExistError('User not found');
     }
 
+    const isPasswordValid = await user.validatePassword(password);
+
+    if (!isPasswordValid) {
+      throw new ResourceDoesNotExistError('Invalid password');
+    }
+
     return user;
   }
   async deleteUser(id: number): Promise<boolean> {

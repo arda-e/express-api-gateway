@@ -15,9 +15,10 @@ services:
       - .:/usr/src/app
       - /usr/src/app/node_modules
     env_file:
-      - .env.dev
+      - .env
     depends_on:
       - db
+      - redis
     networks:
       - express-gateway-network
   db:
@@ -26,7 +27,16 @@ services:
     ports:
       - "5432:5432"
     env_file:
-      - .env.dev
+      - .env
+    networks:
+      - express-gateway-network
+  redis:
+    container_name: redis
+    image: "redis:alpine"
+    ports:
+      - "${REDIS_PORT:-6379}:${REDIS_PORT:-6379}"
+    env_file:
+      - .env
     networks:
       - express-gateway-network
 networks:

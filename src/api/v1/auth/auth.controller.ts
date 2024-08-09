@@ -20,9 +20,23 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
   const { email, password } = req.body;
   try {
     const user = await authService.login(email, password);
+    req.session.userId = user.id;
+
     const [status, response] = ResponseFactory.getSingleResource(user, '/api/v1/auth');
     res.status(status).json(response);
   } catch (error) {
     next(error);
   }
+};
+
+export const logout = (req: Request, res: Response, next: NextFunction): void => {
+  req.session.destroy((err) => {
+    if (err) {
+      return next(err); // TODO: Check error type and handle it in the error handler
+    }
+    res.clearCookie('connect.sid');
+    // TODO: Fix response factory
+    const [status, response] = ResponseFactory.getSingleResource(null, '/api/v1/auth');
+    res.status(status).json({ message: 'Logged out successfully' }); // TODO Handle response in the response factorys
+  });
 };

@@ -1,6 +1,7 @@
 import { Knex } from 'knex';
 
-import { db } from '../index';
+import DatabaseFactory from '../db/db.factory';
+
 /**
  * An abstract base class that provides common CRUD (Create, Read, Update, Delete) operations for a database table.
  * Subclasses must implement the `getTableName()` method to specify the name of the database table.
@@ -9,6 +10,7 @@ export abstract class KnexRepository<T> {
   protected db: Knex;
 
   protected constructor() {
+    const db = DatabaseFactory.getDatabase();
     this.db = db.getInstance();
   }
 
