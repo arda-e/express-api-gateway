@@ -44,7 +44,7 @@ const errorHandler = (err: Error, req: Request, res: Response, next: NextFunctio
       [status, response] = ResponseFactory.createNotFoundResponse(err.message);
       res.status(status).json(response);
       break;
-    case ErrorType.VALIDATION:
+    case ErrorType.VALIDATION: //TODO
       break;
     case ErrorType.INTERNAL_SERVER:
     default:

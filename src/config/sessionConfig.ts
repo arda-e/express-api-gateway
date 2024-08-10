@@ -81,6 +81,9 @@ class SessionManager {
   }
 
   public getSessionMiddleware(): RequestHandler {
+    if (!this.sessionMiddleware) {
+      throw new Error('Session middleware not configured. Call initialize() first.');
+    }
     return this.sessionMiddleware;
   }
 
@@ -180,6 +183,11 @@ class SessionManager {
     SessionManager.instance = null;
     SessionManager.logger.info('Session instance destroyed');
   }
+}
+
+export function getSessionMiddleware(): RequestHandler {
+  const sessionManager = SessionManager.getInstance();
+  return sessionManager.getSessionMiddleware();
 }
 
 export default SessionManager;

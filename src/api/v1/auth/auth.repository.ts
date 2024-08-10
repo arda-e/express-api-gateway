@@ -14,7 +14,7 @@ class AuthRepository extends KnexRepository<User> {
   }
 
   async createUser(username: string, email: string, password: string): Promise<User> {
-    const user = new User(0, username, email, password);
+    const user = new User(undefined, username, email, password);
     await user.hashPassword();
     return this.create(user);
   }

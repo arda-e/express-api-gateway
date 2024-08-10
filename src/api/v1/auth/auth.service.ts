@@ -34,12 +34,20 @@ class AuthService {
 
     return user;
   }
-  async deleteUser(id: number): Promise<boolean> {
-    const user = await this.authRepository.findById(id);
+  async deleteUser(userId: string): Promise<boolean> {
+    const user = await this.authRepository.findById(userId);
     if (!user) {
       throw new ResourceDoesNotExistError('User not found');
     }
-    return await this.authRepository.deleteById(id);
+    return await this.authRepository.deleteById(userId);
+  }
+
+  async getMe(userId: string): Promise<User> {
+    const me = await this.authRepository.findById(userId);
+    if (!me) {
+      throw new ResourceDoesNotExistError('User not found');
+    }
+    return me;
   }
 }
 

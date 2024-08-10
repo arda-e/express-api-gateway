@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid';
+
 /**
  * An abstract base class that provides common properties and functionality for models.
  *
@@ -8,12 +10,12 @@
  * @property {Date} updated_at - The date and time the model instance was last updated.
  */
 abstract class BaseModel {
-  id: number;
+  id: string;
   created_at: Date;
   updated_at: Date;
 
-  protected constructor(id: number) {
-    this.id = id;
+  protected constructor(id?: string) {
+    this.id = id || uuidv4();
     this.created_at = new Date();
     this.updated_at = new Date();
   }

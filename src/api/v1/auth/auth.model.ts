@@ -1,12 +1,18 @@
 import bcrypt from 'bcryptjs';
 import Model from '@utils/Model';
+import { IsEmail, IsString, Length } from 'class-validator';
 
 class User extends Model {
+  @IsString()
+  @Length(3)
   username: string;
+  @IsEmail()
   email: string;
+  @IsString()
+  @Length(6)
   password: string;
 
-  constructor(id: number, username: string, email: string, password: string) {
+  constructor(id: string | undefined, username: string, email: string, password: string) {
     super(id);
     this.username = username;
     this.email = email;

@@ -35,7 +35,7 @@ export abstract class KnexRepository<T> {
    * @param id - The unique identifier of the item to find.
    * @returns The found item, or `null` if not found.
    */
-  async findById(id: number): Promise<T | null> {
+  async findById(id: string): Promise<T | null> {
     const item = await this.db(this.getTableName()).where({ id }).first();
     return item || null;
   }
@@ -56,7 +56,7 @@ export abstract class KnexRepository<T> {
    * @param id - The unique identifier of the item to delete.
    * @returns `true` if the item was deleted, `false` otherwise.
    */
-  async deleteById(id: number): Promise<boolean> {
+  async deleteById(id: string): Promise<boolean> {
     const deletedCount = await this.db(this.getTableName()).where({ id }).del();
     return deletedCount > 0;
   }

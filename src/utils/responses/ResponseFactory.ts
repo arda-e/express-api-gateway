@@ -99,4 +99,8 @@ export class ResponseFactory {
   static createInternalServerErrorResponse(error?: Error): [number, InternalServerErrorResponse] {
     return [StatusCodes.INTERNAL_SERVER_ERROR, new InternalServerErrorResponse(error)];
   }
+  //TODO: check any type of error in the validation error response
+  static createValidationErrorResponse(message: any): [number, BadRequestResponse] {
+    return [StatusCodes.BAD_REQUEST, new BadRequestResponse(message)];
+  }
 }

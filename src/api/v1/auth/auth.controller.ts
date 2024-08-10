@@ -1,11 +1,12 @@
 import { NextFunction, Request, Response } from 'express';
 import { container } from 'tsyringe';
 import { ResponseFactory } from '@utils/responses/ResponseFactory';
+import { UserResponseDTO } from '@api/v1/auth/dtos/UserResponseDTO';
 
 import AuthService from './auth.service';
 
 const authService = container.resolve(AuthService);
-export const register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const register = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { username, email, password } = req.body;
     const user = await authService.register(username, email, password);
@@ -39,4 +40,14 @@ export const logout = (req: Request, res: Response, next: NextFunction): void =>
     const [status, response] = ResponseFactory.getSingleResource(null, '/api/v1/auth');
     res.status(status).json({ message: 'Logged out successfully' }); // TODO Handle response in the response factorys
   });
+};
+
+export const getMe = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const user = await authService.getMe(req.session.userId);
+    const [status, response] = ResponseFactory.getSingleResource(user, '/api/v1/auth');
+    res.status(status).json(response);
+  } catch (error) {
+    next(error);
+  }
 };
