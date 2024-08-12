@@ -17,7 +17,7 @@ const validateRequest = (dtoClass: any) => {
         errors: Object.values(error.constraints || {}),
       }));
       const errorResponse = ResponseFactory.createBadRequestResponse('Validation failed');
-      errorResponse.data = formattedErrors;
+      errorResponse.errors = formattedErrors;
       res.status(errorResponse.statusCode).json(errorResponse);
     }
   };

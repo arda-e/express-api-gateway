@@ -1,5 +1,4 @@
 import { createClient, RedisClientType } from 'redis';
-import Config from '@config/config';
 
 import LoggerFactory from './Logger';
 
@@ -102,7 +101,7 @@ export class RedisManager {
    */
   private connectWithTimeout(timeout: number): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      let connectionTimeout: NodeJS.Timeout;
+      let connectionTimeout: NodeJS.Timeout | number | null;
 
       const timeoutPromise = new Promise<void>((_, reject) => {
         connectionTimeout = setTimeout(() => {
@@ -114,12 +113,12 @@ export class RedisManager {
 
       const connectPromise = new Promise<void>((resolve, reject) => {
         this.redisClient.on('connect', () => {
-          clearTimeout(connectionTimeout);
+          clearTimeout(connectionTimeout as NodeJS.Timeout);
           resolve();
         });
 
         this.redisClient.on('error', (err) => {
-          clearTimeout(connectionTimeout);
+          clearTimeout(connectionTimeout as Nodejs.Timeout);
           reject(err);
         });
       });
