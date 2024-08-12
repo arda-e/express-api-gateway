@@ -1,25 +1,26 @@
-exports.up = function (knex) {
-  return knex.schema
-    .raw('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"')
-    .alterTable('users', function (table) {
-      table.uuid('new_id').defaultTo(knex.raw('uuid_generate_v4()'));
-    })
-    .then(() => {
-      return knex.schema.alterTable('users', function (table) {
-        table.dropPrimary();
-        table.dropColumn('id');
-        table.renameColumn('new_id', 'id');
-        table.primary('id');
-      });
-    });
-};
+import { Knex } from 'knex';
 
-exports.down = function (knex) {
-  return knex.schema
-    .alterTable('users', function (table) {
-      table.dropPrimary();
-      table.dropColumn('id');
-      table.increments('id').primary();
-    })
-    .raw('DROP EXTENSION IF EXISTS "uuid-ossp"');
-};
+export async function up(knex: Knex): Promise<void> {
+  await knex.schema.raw('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"');
+
+  await knex.schema.alterTable('users', (table: Knex.TableBuilder) => {
+    table.uuid('new_id').defaultTo(knex.raw('uuid_generate_v4()'));
+  });
+
+  await knex.schema.alterTable('users', (table: Knex.TableBuilder) => {
+    table.dropPrimary();
+    table.dropColumn('id');
+    table.renameColumn('new_id', 'id');
+    table.primary(['id']);
+  });
+}
+
+export async function down(knex: Knex): Promise<void> {
+  await knex.schema.alterTable('users', (table: Knex.TableBuilder) => {
+    table.dropPrimary();
+    table.dropColumn('id');
+    table.increments('id').primary();
+  });
+
+  await knex.schema.raw('DROP EXTENSION IF EXISTS "uuid-ossp"');
+}

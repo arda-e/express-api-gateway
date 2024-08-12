@@ -1,36 +1,26 @@
-import Logger from '@utils/Logger';
+import { RedisManager } from '@utils/RedisManager';
 
-import { Database } from '../db/db.interface';
+import { SessionManager } from './sessionConfig';
+import DatabaseFactory from '../db/db.factory';
 import KnexAdapter from '../db/knex.adapter';
 import Config from './config';
+import LoggerFactory from '../utils/Logger';
 
-const logger = Logger.getLogger();
+const logger = LoggerFactory.getLogger();
 
-/**
- * Initializes the application's dependencies, including the Redis session middleware and the database connection.
- *
- * This function is responsible for setting up the necessary dependencies for the application to function properly.
- * It first initializes the Redis session middleware, and then creates and initializes the database connection.
- *
- * If any errors occur during the initialization process, they are logged and the errors are re-thrown.
- *
- * @returns {Promise<Database>} The initialized database connection.
- */
-const initializeDependencies = async (
-  SessionConfig: typeof SessionConfig,
-  DatabaseFactory: typeof DatabaseFactory,
-): Promise<Database> => {
-  // Initialize Redis and session middleware
+export const initializeDependencies = async (): Promise<void> => {
   try {
-    await SessionConfig.initialize();
-    logger.info('Redis and session middleware initialized');
-  } catch (error) {
-    logger.error(`Failed to initialize Redis and session middleware: ${error.message}`);
-    throw error;
-  }
-  // Initialize database
-  try {
-    const db: Database = DatabaseFactory.createDatabase(
+    // Initialize Redis
+    await RedisManager.initialize();
+    const redisManager = RedisManager.getInstance();
+    logger.info('Redis initialized');
+
+    // Initialize session middleware
+    await SessionManager.initialize(redisManager);
+    logger.info('Session middleware initialized');
+
+    // Initialize database
+    const db = DatabaseFactory.createDatabase(
       KnexAdapter,
       Config.db.maxRetries,
       Config.db.retryDelay,
@@ -38,9 +28,7 @@ const initializeDependencies = async (
     await db.initialize();
     logger.info('Database initialized');
   } catch (error) {
-    logger.error(`Failed to initialize database: ${error.message}`);
+    logger.error(`Failed to initialize dependencies: ${error.message}`);
     throw error;
   }
 };
-
-export { initializeDependencies };

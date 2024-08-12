@@ -60,4 +60,18 @@ export abstract class KnexRepository<T> {
     const deletedCount = await this.db(this.getTableName()).where({ id }).del();
     return deletedCount > 0;
   }
+
+  /**
+   * Updates an item in the database by its unique identifier (e.g. primary key).
+   * @param id - The unique identifier of the item to update.
+   * @param updateData - The data to update the item with.
+   * @returns The updated item.
+   */
+  async update(id: string, updateData: any): Promise<T> {
+    const updatedItem = await this.db(this.getTableName())
+      .where({ id })
+      .update(updateData)
+      .returning('*');
+    return updatedItem[0];
+  }
 }

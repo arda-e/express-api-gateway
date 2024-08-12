@@ -1,12 +1,12 @@
-import { injectable, inject } from 'tsyringe';
-import { ResourceDoesNotExistError } from '@utils/errors';
+import { inject, injectable } from 'tsyringe';
+import { ResourceDoesNotExistError, UserAlreadyExistsError } from '@utils/errors';
 
-import AuthRepository from './Auth.repository';
-import User from './Auth.model';
-import { UserAlreadyExistsError } from './errors/UserAlreadyExistsError';
+import User from './auth.model';
+import AuthRepository from './auth.repository';
+import { UpdateUserRequestDTO } from './auth.dtos';
 
 @injectable()
-class AuthService {
+export class AuthService {
   constructor(@inject(AuthRepository) private authRepository: AuthRepository) {}
 
   async register(username: string, email: string, password: string): Promise<User> {
@@ -34,20 +34,37 @@ class AuthService {
 
     return user;
   }
+
+  async getMe(userId: string): Promise<User> {
+    const user = await this.authRepository.findById(userId);
+    if (!user) {
+      throw new ResourceDoesNotExistError('User not found');
+    }
+    return user;
+  }
+
+  async updateUser(userId: string, updateData: UpdateUserRequestDTO): Promise<User> {
+    const user = await this.authRepository.findById(userId);
+    if (!user) {
+      throw new ResourceDoesNotExistError('User not found');
+    }
+
+    if (updateData.email && updateData.email !== user.email) {
+      const existingUser = await this.authRepository.findByEmail(updateData.email);
+      if (existingUser) {
+        throw new UserAlreadyExistsError('Email already in use');
+      }
+    }
+
+    return await this.authRepository.update(userId, updateData);
+  }
+
   async deleteUser(userId: string): Promise<boolean> {
     const user = await this.authRepository.findById(userId);
     if (!user) {
       throw new ResourceDoesNotExistError('User not found');
     }
     return await this.authRepository.deleteById(userId);
-  }
-
-  async getMe(userId: string): Promise<User> {
-    const me = await this.authRepository.findById(userId);
-    if (!me) {
-      throw new ResourceDoesNotExistError('User not found');
-    }
-    return me;
   }
 }
 

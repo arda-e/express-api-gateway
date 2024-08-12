@@ -1,15 +1,19 @@
 import { Request, Response, NextFunction } from 'express';
+import { AppError } from '@utils/errors/AppError';
 import Logger from '@utils/Logger';
-import { ResponseFactory } from '@utils/responses/ResponseFactory';
-import { ErrorResponse } from '@utils/responses/error/ErrorResponse';
-import { ErrorType } from '@utils/errors/ErrorTypes';
 
 const logger = Logger.getLogger();
 
 /**
  * Middleware function to handle errors in the application.
  *
- * This middleware function is responsible for logging errors that occur in the application and sending a JSON response with the error message.
+ * This middleware function is responsible for logging errors and sending appropriate
+ * error responses to the client. It handles both custom `AppError` instances and
+ * unhandled errors.
+ *
+ * For `AppError` instances, it sends a JSON response with the error status code,
+ * status, and message. For unhandled errors, it sends a 500 Internal Server Error
+ * response with a generic error message.
  *
  * @param err - The error object that was thrown.
  * @param req - The Express request object.
@@ -24,34 +28,20 @@ const errorHandler = (err: Error, req: Request, res: Response, next: NextFunctio
     body: req.body,
   });
 
-  let status: number;
-  let response: ErrorResponse;
-
-  switch (err.name) {
-    case ErrorType.BAD_REQUEST:
-      [status, response] = ResponseFactory.createBadRequestResponse(err.message);
-      res.status(status).json(response);
-      break;
-    case ErrorType.ROUTE_NOT_FOUND:
-      [status, response] = ResponseFactory.createNotFoundResponse(err.message);
-      res.status(status).json(response);
-      break;
-    case ErrorType.UNAUTHORIZED:
-      [status, response] = ResponseFactory.createUnauthorizedResponse();
-      res.status(status).json(response);
-      break;
-    case ErrorType.RESOURCE_DOES_NOT_EXIST:
-      [status, response] = ResponseFactory.createNotFoundResponse(err.message);
-      res.status(status).json(response);
-      break;
-    case ErrorType.VALIDATION: //TODO
-      break;
-    case ErrorType.INTERNAL_SERVER:
-    default:
-      [status, response] = ResponseFactory.createInternalServerErrorResponse(err.message);
-      res.status(status).json(response);
-      break;
+  if (err instanceof AppError) {
+    return res.status(err.statusCode).json({
+      status: 'error',
+      statusCode: err.statusCode,
+      message: err.message,
+    });
   }
+
+  // For unhandled errors
+  return res.status(500).json({
+    status: 'error',
+    statusCode: 500,
+    message: 'Internal Server Error',
+  });
 };
 
 export default errorHandler;

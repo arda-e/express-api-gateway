@@ -3,5 +3,7 @@
   "trailingComma": "all",
   "singleQuote": true,
   "printWidth": 100,
-  "tabWidth": 2
+  "tabWidth": 2,
+  "newline-per-chained-call": true,
+  "chain-operator-break": "before"
 }
