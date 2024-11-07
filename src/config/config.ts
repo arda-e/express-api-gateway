@@ -28,7 +28,7 @@ const config = {
       },
       redis: {
         host: process.env.REDIS_HOST || 'redis',
-        port: process.env.REDIS_PORT ? parseInt(process.env.APP_SESSION_REDIS_PORT, 10) : 6379,
+        port: process.env.REDIS_PORT ? parseInt(process.env.REDIS_PORT, 10) : 6379,
         password: process.env.APP_SESSION_REDIS_PASSWORD || '',
         prefix: process.env.APP_SESSION_REDIS_PREFIX || 'session:',
       },
