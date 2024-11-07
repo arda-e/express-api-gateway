@@ -1,8 +1,10 @@
 import bcrypt from 'bcryptjs';
-import Model from '@utils/Model';
-import { IsEmail, IsString, Length } from 'class-validator';
+import BaseModel from '@utils/Model';
+import { IsArray, IsEmail, IsString, Length, ValidateNested } from 'class-validator';
+import Role from '@api/v1/role/models/role.model';
+import { Type } from 'class-transformer';
 
-class User extends Model {
+class User extends BaseModel {
   @IsString()
   @Length(3)
   username: string;
@@ -12,11 +14,23 @@ class User extends Model {
   @Length(6)
   password: string;
 
-  constructor(id: string | undefined, username: string, email: string, password: string) {
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => Role)
+  roles: Role[];
+
+  constructor(
+    id: string | undefined,
+    username: string,
+    email: string,
+    password: string,
+    roles: Role[] = [],
+  ) {
     super(id);
     this.username = username;
     this.email = email;
     this.password = password;
+    this.roles = roles;
   }
 
   async hashPassword(): Promise<void> {

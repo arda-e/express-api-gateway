@@ -1,5 +1,10 @@
 import { inject, injectable } from 'tsyringe';
-import { ResourceDoesNotExistError, UserAlreadyExistsError } from '@utils/errors';
+import {
+  AuthenticationError,
+  ResourceDoesNotExistError,
+  UniqueConstraintError,
+} from '@utils/errors';
+import RoleRepository from '@api/v1/role/repositories/role.repository';
 
 import User from './auth.model';
 import AuthRepository from './auth.repository';
@@ -10,26 +15,37 @@ export class AuthService {
   constructor(@inject(AuthRepository) private authRepository: AuthRepository) {}
 
   async register(username: string, email: string, password: string): Promise<User> {
+    console.log('AuthService: Starting registration');
     const existingUser = await this.authRepository.findByEmail(email);
 
     if (existingUser) {
-      throw new UserAlreadyExistsError('User already exists');
+      console.log('AuthService: User already exists, throwing error');
+      throw new UniqueConstraintError('User already exists');
     }
 
-    return await this.authRepository.createUser(username, email, password);
+    const newUser = await this.authRepository.createUser(
+      username,
+      email,
+      password,
+      ['cbd0bdfe-6240-4a9d-8882-e1df7a9938ed'],
+      // TODO: Replace with the actual role ID
+    );
+
+    console.log('AuthService: Registration successful');
+    return newUser;
   }
 
   async login(email: string, password: string): Promise<User> {
     const user = await this.authRepository.findByEmail(email);
 
     if (!user) {
-      throw new ResourceDoesNotExistError('User not found');
+      throw new AuthenticationError('User not found');
     }
 
     const isPasswordValid = await user.validatePassword(password);
 
     if (!isPasswordValid) {
-      throw new ResourceDoesNotExistError('Invalid password');
+      throw new AuthenticationError('Invalid password');
     }
 
     return user;
@@ -52,7 +68,7 @@ export class AuthService {
     if (updateData.email && updateData.email !== user.email) {
       const existingUser = await this.authRepository.findByEmail(updateData.email);
       if (existingUser) {
-        throw new UserAlreadyExistsError('Email already in use');
+        throw new UniqueConstraintError('email', 'Email already in use');
       }
     }
 

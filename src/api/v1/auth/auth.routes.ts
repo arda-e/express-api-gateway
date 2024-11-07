@@ -8,11 +8,11 @@ const router = Router();
 
 router.post('/login', validateRequest(LoginUserRequestDTO), AuthController.login);
 router.post('/register', validateRequest(RegisterUserRequestDTO), AuthController.register);
-// router.post('/logout', AuthController.logout);
+router.post('/logout', AuthController.logout);
 // router.patch('/change-password', validateRequest(ChangePasswordRequestDTO), AuthController.changePassword);
 
 // router.patch('/me', validateRequest(UpdateUserRequestDTO), AuthController.update);
-// router.get('/me', AuthController.me);
+router.get('/me', AuthController.getMe);
 // router.delete('/me', AuthController.delete);
 
 export default router;

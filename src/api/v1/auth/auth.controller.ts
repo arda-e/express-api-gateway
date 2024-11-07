@@ -1,7 +1,14 @@
 import { NextFunction, Request, Response } from 'express';
 import { container } from 'tsyringe';
-import { ResponseFactory } from '@utils/responses/ResponseFactory';
 import { AppError } from '@utils/errors/AppError';
+import {
+  UniqueConstraintError,
+  ResourceDoesNotExistError,
+  AuthenticationError,
+} from '@utils/errors/';
+import 'express-session';
+import { StatusCodes } from 'http-status-codes';
+import { ResponseBuilder, ErrorResponseBuilder } from '@utils/ResponseBuilder';
 
 import AuthService from './auth.service';
 import { LoginUserRequestDTO, RegisterUserRequestDTO, UpdateUserRequestDTO } from './auth.dtos';
@@ -9,13 +16,33 @@ import { LoginUserRequestDTO, RegisterUserRequestDTO, UpdateUserRequestDTO } fro
 const authService = container.resolve(AuthService);
 
 export const register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  console.log('AuthController: Received registration request');
   try {
     const { username, email, password } = req.body as RegisterUserRequestDTO;
+
     const user = await authService.register(username, email, password);
-    const response = ResponseFactory.createResource(user, '/auth/me');
-    res.status(201).json(response);
+
+    res
+      .status(StatusCodes.CREATED)
+      .json(
+        new ResponseBuilder()
+          .setStatus('success')
+          .setStatusCode(StatusCodes.CREATED)
+          .setMessage('User registered successfully')
+          .setData(user)
+          .build(),
+      );
   } catch (error) {
-    next(error);
+    console.log('AuthController: Error during registration:', error);
+    if (error instanceof UniqueConstraintError) {
+      res
+        .status(error.statusCode)
+        .json(
+          new ErrorResponseBuilder(StatusCodes.CONFLICT, 'Email is already registered.').build(),
+        );
+    } else {
+      return next(error);
+    }
   }
 };
 
@@ -24,10 +51,25 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
     const { email, password } = req.body as LoginUserRequestDTO;
     const user = await authService.login(email, password);
     req.session.userId = user.id;
-    const response = ResponseFactory.getSingleResource(user, '/auth/me');
-    res.status(200).json(response);
+    res
+      .status(200)
+      .json(
+        new ResponseBuilder()
+          .setStatus('success')
+          .setMessage('User logged in successfully')
+          .setStatusCode(200)
+          .setData(user)
+          .build(),
+      );
   } catch (error) {
-    next(error);
+    // !INFO: For security reasons the exact wrong property is not disclosed to the client.
+    if (error instanceof AuthenticationError) {
+      res
+        .status(error.statusCode)
+        .json(new ErrorResponseBuilder(error.statusCode, 'Wrong email or password.').build());
+    } else {
+      next(error);
+    }
   }
 };
 
@@ -37,18 +79,45 @@ export const logout = (req: Request, res: Response, next: NextFunction): void =>
       return next(new AppError(500, 'Logout failed'));
     }
     res.clearCookie('connect.sid');
-    const response = ResponseFactory.createDeleteResponse();
-    res.status(200).json(response);
+    res
+      .status(StatusCodes.OK)
+      .json(
+        new ResponseBuilder()
+          .setStatus('success')
+          .setStatusCode(StatusCodes.OK)
+          .setMessage('User logged out successfully.')
+          .build(),
+      );
   });
 };
 
 export const getMe = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const user = await authService.getMe(req.session.userId);
-    const response = ResponseFactory.getSingleResource(user, '/auth/me');
-    res.status(200).json(response);
+    const user = await authService.getMe(req.session.userId as string);
+    res
+      .status(StatusCodes.OK)
+      .json(
+        new ResponseBuilder()
+          .setStatus('success')
+          .setStatusCode(StatusCodes.OK)
+          .setMessage('User retrieved successfully')
+          .setData(user)
+          .build(),
+      );
   } catch (error) {
-    next(error);
+    if (error instanceof ResourceDoesNotExistError) {
+      res
+        .status(StatusCodes.NOT_FOUND)
+        .json(
+          new ResponseBuilder()
+            .setStatus('error')
+            .setStatusCode(StatusCodes.NOT_FOUND)
+            .setMessage(error.message)
+            .build(),
+        );
+    } else {
+      next(error);
+    }
   }
 };
 
@@ -60,11 +129,28 @@ export const updateUser = async (
   try {
     const userId = req.session.userId;
     const updateData = req.body as UpdateUserRequestDTO;
-    const updatedUser = await authService.updateUser(userId, updateData);
-    const response = ResponseFactory.createUpdateResponse(updatedUser, '/auth/me');
-    res.status(200).json(response);
+    const updatedUser = await authService.updateUser(userId!, updateData);
+
+    res
+      .status(StatusCodes.OK)
+      .json(
+        new ResponseBuilder()
+          .setStatus('success')
+          .setStatusCode(StatusCodes.OK)
+          .setMessage('User updated successfully')
+          .setData(updatedUser)
+          .build(),
+      );
   } catch (error) {
-    next(error);
+    if (error instanceof ResourceDoesNotExistError) {
+      res.status(error.statusCode).json({
+        status: 'error',
+        statusCode: error.statusCode,
+        message: error.message,
+      });
+    } else {
+      next(error);
+    }
   }
 };
 
@@ -75,16 +161,32 @@ export const deleteUser = async (
 ): Promise<void> => {
   try {
     const userId = req.session.userId;
-    await authService.deleteUser(userId);
+    await authService.deleteUser(userId!);
     req.session.destroy((err) => {
       if (err) {
         return next(new AppError(500, 'Error during session destruction after user deletion'));
       }
       res.clearCookie('connect.sid');
-      const response = ResponseFactory.createDeleteResponse();
+      const response = {
+        status: 'success',
+        statusCode: 200,
+        message: 'User deleted successfully',
+      };
       res.status(200).json(response);
     });
   } catch (error) {
-    next(error);
+    if (error instanceof ResourceDoesNotExistError) {
+      res
+        .status(StatusCodes.NOT_FOUND)
+        .json(
+          new ResponseBuilder()
+            .setStatus('error')
+            .setStatusCode(StatusCodes.NOT_FOUND)
+            .setMessage(error.message)
+            .build(),
+        );
+    } else {
+      next(error);
+    }
   }
 };
