@@ -14,11 +14,12 @@
     "noImplicitAny": true,
     "strictPropertyInitialization": false,
     "typeRoots": ["./node_modules/@types", "./src/types"],
-    "types": ["node", "jest"],
+    "types": ["node", "jest", "express"],
     "baseUrl": "./src",
     "paths": {
       "@utils/*": ["utils/*"],
       "@api/*": ["api/*"],
+      "@db/*": ["db/*"],
       "@config/*": ["config/*"]
     }
   },
