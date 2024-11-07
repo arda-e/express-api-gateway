@@ -1,26 +1,35 @@
 import { Request, Response, NextFunction } from 'express';
 import { AppError } from '@utils/errors/AppError';
 import Logger from '@utils/Logger';
+import { StatusCodes } from 'http-status-codes';
 
 const logger = Logger.getLogger();
 
 /**
+ * Checks if a user is authenticated based on the session information in the request.
+ *
+ * @param {Request} req - The request object containing session details.
+ * @return {boolean} True if the user is authenticated, false otherwise.
+ */
+function isUserAuthenticated(req: Request): boolean {
+  return !!(req.session && req.session.userId);
+}
+
+/**
  * Middleware function to handle errors in the application.
  *
- * This middleware function is responsible for logging errors and sending appropriate
- * error responses to the client. It handles both custom `AppError` instances and
- * unhandled errors.
+ * Logs detailed error information including the request method, URL, headers, parameters, and body.
+ * Differentiates between user authentication errors, application-specific errors, and general errors,
+ * and responds with appropriate HTTP status codes and messages.
  *
- * For `AppError` instances, it sends a JSON response with the error status code,
- * status, and message. For unhandled errors, it sends a 500 Internal Server Error
- * response with a generic error message.
- *
- * @param err - The error object that was thrown.
- * @param req - The Express request object.
- * @param res - The Express response object.
- * @param next - The Express next middleware function.
+ * @param {Error} err - The error object that was thrown.
+ * @param {Request} req - The Express request object.
+ * @param {Response} res - The Express response object.
+ * @param {NextFunction} next - The next middleware function in the stack.
  */
 const errorHandler = (err: Error, req: Request, res: Response, next: NextFunction) => {
+  console.log('ErrorHandler: Received error:', err);
+
   logger.error(`${req.method} ${req.url} - ${err.message}`, {
     stack: err.stack,
     headers: req.headers,
@@ -28,7 +37,20 @@ const errorHandler = (err: Error, req: Request, res: Response, next: NextFunctio
     body: req.body,
   });
 
+  console.log('Error in errorHandler:', err);
+
+  if (!isUserAuthenticated(req)) {
+    //!TODO: Use response builder
+    return res.status(StatusCodes.UNAUTHORIZED).json({
+      status: 'error',
+      statusCode: StatusCodes.UNAUTHORIZED,
+      message: 'Unauthorized',
+    });
+  }
+
   if (err instanceof AppError) {
+    console.log('ErrorHandler: Handling AppError');
+    //!TODO: Use response builder
     return res.status(err.statusCode).json({
       status: 'error',
       statusCode: err.statusCode,
@@ -36,7 +58,8 @@ const errorHandler = (err: Error, req: Request, res: Response, next: NextFunctio
     });
   }
 
-  // For unhandled errors
+  console.log('ErrorHandler: Unhandled error type');
+  //!TODO: Use response builder
   return res.status(500).json({
     status: 'error',
     statusCode: 500,
