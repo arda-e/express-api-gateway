@@ -8,13 +8,12 @@ COPY . .
 
 # Stage 2: Development Stage
 FROM base AS development
-RUN npm install -g tsx knex
+RUN npm install -g tsx knex @types/node
 ENV NODE_ENV=development
 EXPOSE 8000 9229
 COPY scripts/wait-for-it.sh /usr/src/app/scripts/wait-for-it.sh
 
-CMD ["/usr/src/app/scripts/wait-for-it.sh", "postgres:5432", "--", "sh", "-c", "npx ts-node ./node_modules/.bin/knex migrate:latest --knexfile src/config/knexfile.ts  && tsx watch --inspect=0.0.0.0:9229 src/index.ts"]
-
+CMD ["/usr/src/app/scripts/wait-for-it.sh", "postgres:5432", "--", "sh", "-c", "/usr/src/app/scripts/prepare.sh /usr/src/app/scripts/start-app.sh"]
 # Stage 3: Production Stage
 FROM base AS production
 ENV NODE_ENV=production
