@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuid } from 'uuid';
 
 /**
  * An abstract base class that provides common properties and functionality for models.
@@ -15,7 +15,7 @@ abstract class BaseModel {
   updated_at: Date;
 
   protected constructor(id?: string) {
-    this.id = id || uuidv4();
+    this.id = id || uuid();
     this.created_at = new Date();
     this.updated_at = new Date();
   }
