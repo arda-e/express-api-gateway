@@ -1,34 +1,32 @@
 import { RedisManager } from '@utils/RedisManager';
+import { container } from 'tsyringe';
 
-import { SessionManager } from './sessionConfig';
-import DatabaseFactory from '../db/db.factory';
-import KnexAdapter from '../db/knex.adapter';
-import Config from './config';
+import SessionConfig from './sessionConfig';
+import DatabaseFactory from '../db/db.manager';
 import LoggerFactory from '../utils/Logger';
 
 const logger = LoggerFactory.getLogger();
 
-export const initializeDependencies = async (): Promise<void> => {
+export const initializeDependencies = async (
+  sessionManager: SessionConfig = container.resolve(SessionConfig),
+  databaseFactory: DatabaseFactory = container.resolve(DatabaseFactory),
+): Promise<void> => {
   try {
-    // Initialize Redis
-    await RedisManager.initialize();
-    const redisManager = RedisManager.getInstance();
+    const redisManager = container.resolve(RedisManager);
+    await redisManager.initialize();
     logger.info('Redis initialized');
 
-    // Initialize session middleware
-    await SessionManager.initialize(redisManager);
+    // Initialize session middleware with injected or default session manager
+    sessionManager.getSessionMiddleware();
     logger.info('Session middleware initialized');
-
-    // Initialize database
-    const db = DatabaseFactory.createDatabase(
-      KnexAdapter,
-      Config.db.maxRetries,
-      Config.db.retryDelay,
-    );
-    await db.initialize();
-    logger.info('Database initialized');
-  } catch (error) {
-    logger.error(`Failed to initialize dependencies: ${error.message}`);
+    // Initialize database with injected or default database factory
+    await databaseFactory.createDatabase();
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      logger.error(`Failed to initialize dependencies: ${error.message}`);
+    } else {
+      logger.error('Failed to initialize dependencies: Unknown error');
+    }
     throw error;
   }
 };
