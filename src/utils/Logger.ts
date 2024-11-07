@@ -1,4 +1,4 @@
-import { createLogger, format, transports } from 'winston';
+import { createLogger, format, transports, Logger } from 'winston';
 import 'winston-daily-rotate-file';
 
 class LoggerFactory {

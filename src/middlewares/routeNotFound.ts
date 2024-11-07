@@ -20,5 +20,5 @@ export default function routeNotFound(
   next: NextFunction,
 ): void {
   const error = new RouteNotFoundError(`🔍 - Not Found - ${req.originalUrl}`);
-  next(error);
+  res.status(404).json({ error: error.message });
 }

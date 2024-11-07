@@ -31,6 +31,10 @@ class KnexAdapter extends DbAdapter<Knex> {
     await this.instance!.raw('SELECT 1');
   }
 
+  async createTransaction(): Promise<Knex.Transaction> {
+    return this.instance!.transaction();
+  }
+
   /**
    * Executes a raw SQL query using Knex.
    * @param queryString - The SQL query string.

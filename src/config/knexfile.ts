@@ -17,6 +17,10 @@ const config: { [key: string]: Knex.Config } = {
       directory: '../migrations',
       extension: 'ts',
     },
+    seeds: {
+      directory: '../seeds',
+      extension: 'ts',
+    },
   },
   production: {
     client: 'pg',
@@ -29,6 +33,10 @@ const config: { [key: string]: Knex.Config } = {
     migrations: {
       directory: './dist/migrations',
       extension: 'js',
+    },
+    seeds: {
+      directory: '../seeds',
+      extension: 'ts',
     },
   },
 };
