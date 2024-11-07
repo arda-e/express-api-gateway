@@ -1,77 +1,80 @@
 import { Knex } from 'knex';
+import { DatabaseError } from '@utils/errors/DatabaseError';
+import { ResourceDoesNotExistError } from '@utils/errors';
+import { inject } from 'tsyringe';
 
-import DatabaseFactory from '../db/db.factory';
+import DatabaseManager from '../db/db.manager';
 
-/**
- * An abstract base class that provides common CRUD (Create, Read, Update, Delete) operations for a database table.
- * Subclasses must implement the `getTableName()` method to specify the name of the database table.
- */
-export abstract class KnexRepository<T> {
+type InsertData<T> = Omit<T, 'id'>;
+type UpdateData<T> = Partial<Omit<T, 'id'>>;
+
+export abstract class KnexRepository<T extends { id: string }> {
   protected db: Knex;
 
-  protected constructor() {
-    const db = DatabaseFactory.getDatabase();
-    this.db = db.getInstance();
+  protected constructor(@inject(DatabaseManager) protected databaseManager: DatabaseManager) {
+    this.db = this.databaseManager.getDatabase().getInstance();
   }
 
-  /**
-   * Returns the name of the database table that this repository operates on.
-   * Subclasses must implement this method to specify the table name.
-   * @returns The name of the database table.
-   */
   abstract getTableName(): string;
 
-  /**
-   * Creates a new item in the database table and returns the created item.
-   * @param item - The item to create in the database.
-   * @returns The created item.
-   */
-  async create(item: T): Promise<T> {
+  async create(item: InsertData<T>): Promise<T> {
     const [createdItem] = await this.db(this.getTableName()).insert(item).returning('*');
     return createdItem;
   }
-  /**
-   * Finds an item in the database by its unique identifier (e.g. primary key).
-   * @param id - The unique identifier of the item to find.
-   * @returns The found item, or `null` if not found.
-   */
+
   async findById(id: string): Promise<T | null> {
-    const item = await this.db(this.getTableName()).where({ id }).first();
-    return item || null;
+    const result = await this.db(this.getTableName()).where(id).first();
+
+    if (!result) {
+      throw new ResourceDoesNotExistError(`Item with id ${id} does not exist`);
+    }
+
+    return result;
   }
-  /**
-   * Finds an item in the database by a specific field and its value.
-   * @param field - The name of the field to search by.
-   * @param value - The value of the field to search for.
-   * @returns The found item, or `null` if not found.
-   */
-  async findByField(field: string, value: any): Promise<T | null> {
-    const item = await this.db(this.getTableName())
-      .where({ [field]: value })
-      .first();
-    return item || null;
+
+  async findByField<K extends keyof T>(field: K, value: T[K]): Promise<T[] | null> {
+    const result = await this.db<T>(this.getTableName()).where({ [field]: value });
+
+    if (!result) {
+      throw new ResourceDoesNotExistError(`Item with ${String(field)} ${value} does not exist`);
+    }
+
+    return result as T[];
   }
-  /**
-   * Deletes an item from the database by its unique identifier (e.g. primary key).
-   * @param id - The unique identifier of the item to delete.
-   * @returns `true` if the item was deleted, `false` otherwise.
-   */
+
   async deleteById(id: string): Promise<boolean> {
-    const deletedCount = await this.db(this.getTableName()).where({ id }).del();
+    await this.findById(id);
+
+    const deletedCount = await this.db(this.getTableName()).where('id', id).del();
     return deletedCount > 0;
   }
 
-  /**
-   * Updates an item in the database by its unique identifier (e.g. primary key).
-   * @param id - The unique identifier of the item to update.
-   * @param updateData - The data to update the item with.
-   * @returns The updated item.
-   */
-  async update(id: string, updateData: any): Promise<T> {
-    const updatedItem = await this.db(this.getTableName())
-      .where({ id })
+  async update(id: string, updateData: UpdateData<T>): Promise<T> {
+    await this.findById(id);
+
+    const [updatedItem] = await this.db<T>(this.getTableName())
+      .where('id', id)
       .update(updateData)
       .returning('*');
-    return updatedItem[0];
+    return updatedItem as T;
+  }
+
+  async findAll(): Promise<T[]> {
+    return this.db(this.getTableName()).select('*');
+  }
+
+  async findManyByField<K extends keyof T>(field: K, values: T[K][]): Promise<T[]> {
+    try {
+      const results = await this.db<T>(this.getTableName()).whereIn(field as string, values);
+      return results;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new DatabaseError(
+          `Failed to find items by field ${field as string}: ${error.message}`,
+        );
+      } else {
+        throw new DatabaseError(`Failed to find items by field ${field as string}`);
+      }
+    }
   }
 }
