@@ -1,10 +1,16 @@
 import { RequestHandler } from 'express';
+import Config from '@config/config';
+import { singleton, inject, container } from 'tsyringe';
 import session, { SessionOptions } from 'express-session';
 import RedisStore from 'connect-redis';
-import Config from '@config/config';
 import { RedisManager } from '@utils/RedisManager';
+import { RedisClientType } from 'redis';
 
 import LoggerFactory from '../utils/Logger';
+
+const SESSION_SECRET = Config.app.session.secret;
+const SESSION_COOKIE_MAX_AGE = Config.app.session.cookie.maxAge;
+const SESSION_ENVIRONMENT = Config.server.environment === 'production';
 
 /**
  * Manages the session middleware for the application.
@@ -12,64 +18,48 @@ import LoggerFactory from '../utils/Logger';
  * This class is responsible for initializing and configuring the session middleware, which is used to manage user sessions.
  * It uses a Redis store to persist session data, and provides methods to retrieve the configured session middleware.
  *
- * The `SessionManager` is a singleton class, and should be initialized once during application startup by calling the `initialize()` method.
+ * The `SessionManager` is a singleton class and is initialized once during application startup by the DI container.
  */
-export class SessionManager {
-  private static instance: SessionManager | null = null;
-  private sessionMiddleware: RequestHandler;
+@singleton()
+class SessionManager {
+  private readonly sessionMiddleware: RequestHandler;
   private static logger = LoggerFactory.getLogger();
 
-  private constructor(private redisManager: RedisManager) {}
-
-  /**
-   * Initializes the singleton instance of the `SessionManager` class and configures the session middleware.
-   *
-   * This method should be called once during application startup to set up the session management functionality.
-   *
-   * @param redisManager - The `RedisManager` instance to be used for the session store.
-   * @returns A Promise that resolves when the session middleware has been configured.
-   * @throws {Error} If the `SessionManager` has already been initialized.
-   */
-  public static async initialize(redisManager: RedisManager): Promise<void> {
-    if (!SessionManager.instance) {
-      SessionManager.instance = new SessionManager(redisManager);
-      SessionManager.instance.configureSessionMiddleware();
-      SessionManager.logger.info('Session middleware initialized');
-    }
+  constructor(@inject(RedisManager) private redisManager: RedisManager) {
+    this.sessionMiddleware = this.configureSessionMiddleware();
+    SessionManager.logger.info('Session middleware initialized');
   }
 
   /**
-   * Gets the singleton instance of the `SessionManager` class.
+   * Configures the session middleware for the application.
    *
-   * @returns {SessionManager} The singleton instance of the `SessionManager` class.
-   * @throws {Error} If the `SessionManager` has not been initialized by calling the `initialize()` method.
+   * This method sets up the session options and Redis store for managing sessions.
+   *
+   * @returns {RequestHandler} The configured session middleware.
    */
-  public static getInstance(): SessionManager {
-    if (!SessionManager.instance) {
-      throw new Error('SessionManager not initialized. Call initialize() first.');
-    }
-    return SessionManager.instance;
-  }
-
-  private configureSessionMiddleware(): void {
+  private configureSessionMiddleware(): RequestHandler {
     const redisStore = new RedisStore({
-      client: this.redisManager.getRedisClient(),
+      client: this.getRedisClient,
       disableTouch: true,
     });
 
     const sessionOptions: SessionOptions = {
       store: redisStore,
-      secret: Config.app.session.secret,
+      secret: SESSION_SECRET,
       resave: false,
       saveUninitialized: false,
       cookie: {
-        secure: Config.server.environment === 'production',
+        secure: SESSION_ENVIRONMENT,
         httpOnly: true,
-        maxAge: Config.app.session.cookie.maxAge,
+        maxAge: SESSION_COOKIE_MAX_AGE,
       },
     };
 
-    this.sessionMiddleware = session(sessionOptions);
+    return session(sessionOptions);
+  }
+
+  public getRedisClient(): RedisClientType {
+    return this.redisManager.getRedisClient();
   }
 
   /**
@@ -78,23 +68,36 @@ export class SessionManager {
    * This method should be called to retrieve the session middleware after the `SessionManager` has been initialized.
    *
    * @returns {RequestHandler} The configured session middleware.
-   * @throws {Error} If the session middleware has not been configured by calling the `initialize()` method.
    */
   public getSessionMiddleware(): RequestHandler {
-    if (!this.sessionMiddleware) {
-      throw new Error('Session middleware not configured. Call initialize() first.');
-    }
     return this.sessionMiddleware;
   }
+
+  /**
+   * Destroys the session manager instance and closes the Redis connection.
+   *
+   * This method should be called during the graceful shutdown process to clean up resources.
+   */
+  public async destroy(): Promise<void> {
+    SessionManager.logger.info('Destroying session manager and closing Redis connection');
+    try {
+      await this.redisManager.getRedisClient().quit();
+    } catch (error) {
+      SessionManager.logger.error('Failed to close Redis connection:', error);
+    }
+  }
 }
+
+export default SessionManager;
+
 /**
  * Gets the session middleware configured for the application.
  *
  * This function should be called to retrieve the session middleware after the `SessionManager` has been initialized.
  *
  * @returns {RequestHandler} The configured session middleware.
- * @throws {Error} If the session middleware has not been configured by calling the `initialize()` method on the `SessionManager`.
  */
 export const getSessionMiddleware = (): RequestHandler => {
-  return SessionManager.getInstance().getSessionMiddleware();
+  const sessionManager = container.resolve(SessionManager);
+  return sessionManager.getSessionMiddleware();
 };

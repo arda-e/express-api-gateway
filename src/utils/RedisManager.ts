@@ -1,4 +1,5 @@
 import { createClient, RedisClientType } from 'redis';
+import { singleton } from 'tsyringe';
 
 import LoggerFactory from './Logger';
 
@@ -9,12 +10,12 @@ import LoggerFactory from './Logger';
  *
  * The `initialize()` method should be called before using any other methods of the RedisManager class to ensure the Redis client is properly initialized.
  */
+@singleton()
 export class RedisManager {
-  private static instance: RedisManager | null = null;
   private redisClient: RedisClientType;
   private static logger = LoggerFactory.getLogger();
 
-  private constructor() {}
+  constructor() {}
 
   /**
    * Initializes the Redis client and sets the singleton instance of the RedisManager class.
@@ -24,33 +25,16 @@ export class RedisManager {
    * @throws {Error} If the Redis client fails to connect after the specified number of retries.
    * @returns {Promise<void>} A Promise that resolves when the Redis client is successfully initialized.
    */
-  public static async initialize(): Promise<void> {
-    if (!RedisManager.instance) {
-      RedisManager.instance = new RedisManager();
-      await RedisManager.instance.initRedisClient(5000);
-      RedisManager.logger.info('Redis client initialized');
-    }
-  }
-
-  /**
-   * Gets the singleton instance of the RedisManager class.
-   *
-   * This method returns the singleton instance of the RedisManager class. If the RedisManager has not been initialized yet, it throws an error.
-   *
-   * @returns {RedisManager} The singleton instance of the RedisManager class.
-   * @throws {Error} If the RedisManager has not been initialized yet.
-   */
-  public static getInstance(): RedisManager {
-    if (!RedisManager.instance) {
-      throw new Error('RedisManager not initialized. Call initialize() first.');
-    }
-    return RedisManager.instance;
+  public async initialize(): Promise<void> {
+    await this.initRedisClient();
+    RedisManager.logger.info('Redis client initialized');
   }
 
   /**
    * Gets the Redis client instance.
    *
-   * This method returns the Redis client instance that was initialized by the `initialize()` method. It can be used to interact with the Redis server.
+   * This method returns the Redis client instance that was initialized by the `initialize()` method.
+   * It can be used to interact with the Redis server.
    *
    * @returns {RedisClientType} The Redis client instance.
    */
@@ -79,14 +63,16 @@ export class RedisManager {
       try {
         await this.connectWithTimeout(timeout);
         return;
-      } catch (err) {
+      } catch (error) {
         attempts += 1;
+        const errorMessage = error instanceof Error ? error.message : String(error);
+
         RedisManager.logger.error(
-          `Failed to connect to Redis (attempt ${attempts}/${maxRetries}): ${err.message}`,
+          `Failed to connect to Redis (attempt ${attempts}/${maxRetries}): ${errorMessage}`,
         );
         if (attempts >= maxRetries) {
           throw new Error(
-            `Failed to connect to Redis after ${maxRetries} attempts: ${err.message}`,
+            `Failed to connect to Redis after ${maxRetries} attempts: ${errorMessage}`,
           );
         }
       }
@@ -118,7 +104,7 @@ export class RedisManager {
         });
 
         this.redisClient.on('error', (err) => {
-          clearTimeout(connectionTimeout as Nodejs.Timeout);
+          clearTimeout(connectionTimeout as NodeJS.Timeout);
           reject(err);
         });
       });
