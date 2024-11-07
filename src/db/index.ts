@@ -1,1 +1,1 @@
-export { default as createDatabase } from './db.factory';
+export { default as createDatabase } from './db.manager';
