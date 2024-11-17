@@ -9,9 +9,15 @@ import {
 import 'express-session';
 import { StatusCodes } from 'http-status-codes';
 import { ResponseBuilder, ErrorResponseBuilder } from '@utils/ResponseBuilder';
+import bcrypt from 'bcryptjs';
 
 import AuthService from './auth.service';
-import { LoginUserRequestDTO, RegisterUserRequestDTO, UpdateUserRequestDTO } from './auth.dtos';
+import {
+  ChangePasswordRequestDTO,
+  LoginUserRequestDTO,
+  RegisterUserRequestDTO,
+  UpdateUserRequestDTO,
+} from './auth.dtos';
 
 const authService = container.resolve(AuthService);
 
@@ -188,5 +194,36 @@ export const deleteUser = async (
     } else {
       next(error);
     }
+  }
+};
+
+export const changePassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const { password, newPassword } = req.body as ChangePasswordRequestDTO;
+
+    const userId = req.session?.userId || req.user?.id; // Adjust according to your auth setup
+    if (!userId) throw new AuthenticationError('Authentication required');
+
+    const user = await authService.getMe(userId);
+    const isPasswordValid = await authService.validatePassword(password, user.password);
+
+    if (!isPasswordValid) throw new AuthenticationError('Invalid password');
+
+    const cryptPassword = await bcrypt.hash(newPassword, 10);
+    await authService.updateUser(userId, { password: cryptPassword });
+
+    const response = new ResponseBuilder()
+      .setStatusCode(StatusCodes.CREATED)
+      .setStatus('success')
+      .setMessage('Password changed successfully')
+      .build();
+
+    res.status(response.statusCode).json(response);
+  } catch (error) {
+    next(error);
   }
 };

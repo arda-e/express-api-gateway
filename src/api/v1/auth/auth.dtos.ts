@@ -25,6 +25,9 @@ export class RegisterUserRequestDTO {
 export class ChangePasswordRequestDTO {
   @IsString()
   @Length(6, undefined, { message: 'Password must be at least 6 characters long' })
+  newPassword: string;
+
+  @IsString()
   password: string;
 }
 
@@ -32,14 +35,14 @@ export class UpdateUserRequestDTO {
   @IsString()
   @IsOptional()
   @Length(3, undefined, { message: 'Username must be at least 3 characters long' })
-  username: string;
+  username?: string;
 
   @IsOptional()
   @IsEmail({}, { message: 'Please enter a valid email address' })
-  email: string;
+  email?: string;
 
   @IsOptional()
   @IsString()
   @Length(6, undefined, { message: 'Password must be at least 6 characters long' })
-  password: string;
+  password?: string;
 }

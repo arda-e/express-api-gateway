@@ -3,8 +3,10 @@ import {
   AuthenticationError,
   ResourceDoesNotExistError,
   UniqueConstraintError,
+  ValidationError,
 } from '@utils/errors';
 import RoleRepository from '@api/v1/role/repositories/role.repository';
+import bcrypt from 'bcryptjs';
 
 import User from './auth.model';
 import AuthRepository from './auth.repository';
@@ -81,6 +83,15 @@ export class AuthService {
       throw new ResourceDoesNotExistError('User not found');
     }
     return await this.authRepository.deleteById(userId);
+  }
+
+  async validatePassword(plainTextPassword: string, hashedPassword: string): Promise<boolean> {
+    try {
+      return await bcrypt.compare(plainTextPassword, hashedPassword);
+    } catch (error) {
+      console.error('Error validating password:', error);
+      throw new ValidationError('Password validation failed');
+    }
   }
 }
 
