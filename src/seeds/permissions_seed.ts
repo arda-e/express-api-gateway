@@ -1,6 +1,5 @@
 import { Knex } from 'knex';
-
-import { PermissionActions, RoleActions, UserActions } from '../utils/enums';
+import { PermissionActions, RoleActions, UserActions } from '@utils/enums';
 
 export async function seed(knex: Knex): Promise<void> {
   // Deletes ALL existing entries

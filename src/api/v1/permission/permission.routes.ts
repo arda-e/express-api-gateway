@@ -1,4 +1,4 @@
-import { Router, RequestHandler } from 'express';
+import { Router } from 'express';
 import { PermissionActions } from '@utils/enums';
 
 import * as PermissionController from './permission.controller';

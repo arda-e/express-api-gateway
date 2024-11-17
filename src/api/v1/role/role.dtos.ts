@@ -19,11 +19,12 @@ export class UpdateRoleDTO {
   @Length(3, 255)
   description: string;
 }
-1;
+
 export class GetRoleDTO {
   @IsUUID()
   id: string;
 }
+
 export class DeleteRoleDTO {
   @IsUUID()
   id: string;

@@ -12,8 +12,8 @@ class Role extends BaseModel {
   @Max(5000)
   description?: string;
 
-  @IsBoolean
-  @IsOptional
+  @IsBoolean()
+  @IsOptional()
   isActive?: boolean = true;
 
   @IsArray()

@@ -8,10 +8,11 @@ import {
 import { AuthRepository } from '@api/v1/auth/';
 import User from '@api/v1/auth/auth.model';
 import RolePermissionRepository from '@api/v1/role/repositories/role-permissions.repository';
-import Permission from '@api/v1/permission/permission.model';
+import { RolePermission, RoleUser } from '@api/v1/role/models';
 
 import RoleRepository from './repositories/role-user.repository';
 import UserRoleRepository from './repositories/role-user.repository';
+
 @injectable()
 class RoleService {
   constructor(
@@ -126,7 +127,7 @@ class RoleService {
    * @returns The existing role.
    * @throws {ResourceDoesNotExistError} If the role with the given ID does not exist.
    */
-  private async ensureRoleExists(roleId: string): Promise<Role> {
+  private async ensureRoleExists(roleId: string): Promise<RoleUser> {
     const existingRole = await this.roleRepository.findById(roleId);
     if (!existingRole) {
       throw new ResourceDoesNotExistError('Role not found');
@@ -144,7 +145,7 @@ class RoleService {
     await this.rolePermissionRepository.removePermissionFromRole(roleId, permissionId);
   }
 
-  async getRolePermissions(roleId: string): Promise<Permission[]> {
+  async getRolePermissions(roleId: string): Promise<RolePermission[]> {
     await this.ensureRoleExists(roleId);
     return this.rolePermissionRepository.getRolePermissions(roleId);
   }

@@ -5,7 +5,7 @@ import {
   UniqueConstraintError,
   ValidationError,
 } from '@utils/errors';
-import RoleRepository from '@api/v1/role/repositories/role.repository';
+// import RoleRepository from '@api/v1/role/repositories/role.repository';
 import bcrypt from 'bcryptjs';
 
 import User from './auth.model';

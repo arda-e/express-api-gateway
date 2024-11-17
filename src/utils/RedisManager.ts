@@ -95,6 +95,7 @@ export class RedisManager {
         }, timeout) as NodeJS.Timeout;
       });
 
+      // !TODO:
       this.redisClient.connect();
 
       const connectPromise = new Promise<void>((resolve, reject) => {

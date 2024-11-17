@@ -29,20 +29,20 @@ interface IResponse {
  * various properties of the response.
  */
 export class ResponseBuilder implements IResponseBuilder {
-  private status: 'success' | 'error' = 'success';
+  private _status: 'success' | 'error' = 'success';
   private statusCode: number = 200;
-  private message: string = '';
-  private data: unknown = null;
-  private errorCode: string | null = null;
-  private errors: Array<{ field: string; errors: string[] }> | null = null;
+  private _message: string = '';
+  private _data: unknown = null;
+  private _errorCode: string | null = null;
+  private _errors: Array<{ field: string; errors: string[] }> | null = null;
 
-  setStatus(status: 'success' | 'error'): this {
-    this.status = status;
+  public setStatus(status: 'success' | 'error'): this {
+    this._status = status;
     return this;
   }
 
   setErrors(errors: Array<{ field: string; errors: string[] }>): this {
-    this.errors = errors;
+    this._errors = errors;
     return this;
   }
 
@@ -52,40 +52,64 @@ export class ResponseBuilder implements IResponseBuilder {
   }
 
   setMessage(message: string): this {
-    this.message = message;
+    this._message = message;
     return this;
   }
 
   setData(data: unknown): this {
-    this.data = data;
+    this._data = data;
     return this;
   }
 
   setErrorCode(errorCode: string | number): this {
-    this.errorCode = String(errorCode);
+    this._errorCode = String(errorCode);
     return this;
   }
 
   build(): IResponse {
     const response = {
-      status: this.status,
+      status: this._status,
       statusCode: this.statusCode,
-      message: this.message,
+      message: this._message,
     };
 
-    if (this.errors) {
-      (response as IResponse).errors = this.errors;
+    if (this._errors) {
+      (response as IResponse).errors = this._errors;
     }
 
-    if (this.data !== null) {
-      (response as IResponse).data = this.data;
+    if (this._data !== null) {
+      (response as IResponse).data = this._data;
     }
 
-    if (this.status === 'error' && this.errorCode) {
-      (response as IResponse).errorCode = this.errorCode;
+    if (this._status === 'error' && this._errorCode) {
+      (response as IResponse).errorCode = this._errorCode;
     }
 
     return response;
+  }
+
+  public get getStatusCode() {
+    return this.statusCode;
+  }
+
+  public get status(): 'success' | 'error' {
+    return this._status;
+  }
+
+  get message(): string {
+    return this._message;
+  }
+
+  get data(): unknown {
+    return this._data;
+  }
+
+  get errorCode(): string | null {
+    return this._errorCode;
+  }
+
+  get errors(): Array<{ field: string; errors: string[] }> | null {
+    return this._errors;
   }
 }
 

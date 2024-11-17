@@ -14,17 +14,6 @@ class PermissionRepository extends KnexRepository<Permission> {
   getTableName(): string {
     return 'permissions';
   }
-
-  async findByNames(names: string[]): Promise<Permission[]> {
-    try {
-      return await this.db(this.getTableName()).whereIn('name', names);
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        throw new DatabaseError(`Error finding permissions by names: ${error.message}`);
-      }
-      throw new DatabaseError('Error finding permissions by names: Unknown error');
-    }
-  }
 }
 
 export default PermissionRepository;

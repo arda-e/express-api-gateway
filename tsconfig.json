@@ -13,7 +13,7 @@
     "resolveJsonModule": true,
     "noImplicitAny": true,
     "strictPropertyInitialization": false,
-    "typeRoots": ["./node_modules/@types", "./src/types"],
+    "typeRoots": ["./node_modules/@types", "./src/*.d.ts"],
     "types": ["node", "jest", "express"],
     "baseUrl": "./src",
     "paths": {

@@ -3,7 +3,7 @@ import { KnexRepository } from '@utils/Repository';
 import { Role, RoleUser } from '@api/v1/role/models';
 import User from '@api/v1/auth/auth.model';
 import { AuthRepository } from '@api/v1/auth';
-import { DatabaseError, ResourceDoesNotExistError } from '@utils/errors';
+import { ResourceDoesNotExistError } from '@utils/errors';
 import { RoleRepository } from '@api/v1/role/repositories';
 
 import DatabaseManager from '../../../../db/db.manager';
@@ -64,13 +64,6 @@ class RoleUserRepository extends KnexRepository<RoleUser> {
     if (!role) {
       throw new ResourceDoesNotExistError('Role not found');
     }
-  }
-
-  private handleRepositoryError(error: Error, operation: string): never {
-    if (error instanceof ResourceDoesNotExistError) {
-      throw error;
-    }
-    throw new DatabaseError(`Failed to ${operation}: ${error.message}`);
   }
 }
 

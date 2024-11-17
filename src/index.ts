@@ -5,5 +5,5 @@ import { startServer } from './server';
 
 console.log('Starting server...');
 dotenv.config();
-
+// !TODO:
 startServer();
