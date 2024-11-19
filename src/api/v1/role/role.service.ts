@@ -1,16 +1,25 @@
 import { inject, injectable } from 'tsyringe';
-import { Role, RolePermission } from '@api/v1/role/models';
-import { DatabaseError, ResourceDoesNotExistError } from '@utils/errors';
 import { StatusCodes } from 'http-status-codes';
-import { RolePermissionRepository, RoleRepository } from '@api/v1/role/repositories';
+import { Role, RolePermission } from '@api/v1/role/models';
+import {
+  RolePermissionRepository,
+  RoleRepository,
+  RoleUserRepository,
+} from '@api/v1/role/repositories';
 import AuthRepository from '@api/v1/auth/auth.repository';
+import User from '@api/v1/auth/auth.model';
+import {
+  DatabaseError,
+  ResourceAlreadyExistsError,
+  ResourceDoesNotExistError,
+} from '@utils/errors';
 
 @injectable()
 class RoleService {
   constructor(
     @inject(RoleRepository) private roleRepository: RoleRepository,
     @inject(AuthRepository) private authRepository: AuthRepository,
-    @inject(UserRoleRepository) private userRoleRepository: UserRoleRepository,
+    @inject(RoleUserRepository) private userRoleRepository: RoleUserRepository,
     @inject(RolePermissionRepository) private rolePermissionRepository: RolePermissionRepository,
   ) {}
 
