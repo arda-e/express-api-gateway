@@ -6,7 +6,7 @@ import { Type } from 'class-transformer';
 import BaseModel from '@utils/Model';
 import Role from '@api/v1/role/models/role.model';
 
-class User extends BaseModel {
+export class User extends BaseModel {
   @IsString()
   @Length(3)
   username: string;
@@ -43,5 +43,3 @@ class User extends BaseModel {
     return await bcrypt.compare(password, this.password);
   }
 }
-
-export default User;

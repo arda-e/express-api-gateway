@@ -8,8 +8,7 @@ import {
   ResourceDoesNotExistError,
 } from '@utils/errors';
 //** INTERNAL MODULES
-import User from '@api/v1/auth/auth.model';
-import AuthRepository from '@api/v1/auth/auth.repository';
+import { User, AuthRepository } from '@api/v1/auth';
 import { Role, RolePermission } from '@api/v1/role/models';
 import {
   RolePermissionRepository,

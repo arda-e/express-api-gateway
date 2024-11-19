@@ -5,8 +5,7 @@ import DatabaseManager from '@db/db.manager';
 import { ResourceDoesNotExistError } from '@utils/errors';
 import { KnexRepository } from '@utils/Repository';
 //** INTERNAL MODULES
-import User from '@api/v1/auth/auth.model';
-import { AuthRepository } from '@api/v1/auth';
+import { User, AuthRepository } from '@api/v1/auth';
 import { Role, RoleUser } from '@api/v1/role/models';
 import { RoleRepository } from '@api/v1/role/repositories';
 
