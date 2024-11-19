@@ -30,7 +30,7 @@ export class AuthService {
       email,
       password,
       ['cbd0bdfe-6240-4a9d-8882-e1df7a9938ed'],
-      // TODO: Replace with the actual role ID
+      // !TODO: Replace with the actual role ID
     );
 
     console.log('AuthService: Registration successful');

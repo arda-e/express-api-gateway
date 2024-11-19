@@ -13,16 +13,20 @@
     "resolveJsonModule": true,
     "noImplicitAny": true,
     "strictPropertyInitialization": false,
-    "typeRoots": ["./node_modules/@types", "./src/*.d.ts"],
+    "typeRoots": ["./node_modules/@types", "./src/types"],
     "types": ["node", "jest", "express"],
     "baseUrl": "./src",
     "paths": {
       "@utils/*": ["utils/*"],
       "@api/*": ["api/*"],
       "@db/*": ["db/*"],
-      "@config/*": ["config/*"]
+      "@config/*": ["config/*"],
+      "@middlewares/*": ["middlewares/*"]
     }
   },
-  "include": ["src/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "src/**/*.ts"
+    //"src/**/*.d.ts"
+  ],
+  "exclude": ["node_modules", "dist"]
 }

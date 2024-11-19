@@ -1,5 +1,4 @@
-import { NextFunction, Request, Response } from 'express';
-import { ErrorResponse } from '@utils/responses/error/ErrorResponse';
+import { Request, Response } from 'express';
 import { RouteNotFoundError } from '@utils/errors';
 
 /**
@@ -10,15 +9,9 @@ import { RouteNotFoundError } from '@utils/errors';
  *
  * @param {Request} req - The Express Request object.
  * @param {Response} res - The Express Response object.
- * @param {NextFunction} next - The Express NextFunction.
- * @returns {void} It calls the `next` function to pass control to the next middleware or route handler.
  * @throws {Error} If the route is not found.
  */
-export default function routeNotFound(
-  req: Request,
-  res: Response<ErrorResponse>,
-  next: NextFunction,
-): void {
+export default function routeNotFound(req: Request, res: Response): void {
   const error = new RouteNotFoundError(`🔍 - Not Found - ${req.originalUrl}`);
   res.status(404).json({ error: error.message });
 }

@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import { RoleActions } from '@utils/enums';
+import { authorization, validateRequest } from '@middlewares/';
 
 import * as RoleController from './role.controllers';
-import { authorization, validateRequest } from '../../../middlewares';
 import * as DTO from './role.dtos';
 
 const router = Router();

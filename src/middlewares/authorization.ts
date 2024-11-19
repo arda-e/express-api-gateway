@@ -8,6 +8,7 @@ interface RequestWithUser extends Request {
     id: string;
   };
 }
+
 /**
  * Middleware function that checks if the current user has the required permissions to access a resource.
  *
@@ -15,7 +16,7 @@ interface RequestWithUser extends Request {
  * @returns {RequestHandler} - An Express middleware function that performs the authorization check.
  */
 export const authorization = (requiredPermissions: string[]): RequestHandler => {
-  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  return async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
     try {
       const userId = (req as RequestWithUser).user?.id;
       if (!userId) {

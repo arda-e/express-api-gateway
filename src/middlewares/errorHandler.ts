@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 import { AppError } from '@utils/errors/AppError';
 import Logger from '@utils/Logger';
 import { StatusCodes } from 'http-status-codes';
@@ -25,9 +25,8 @@ function isUserAuthenticated(req: Request): boolean {
  * @param {Error} err - The error object that was thrown.
  * @param {Request} req - The Express request object.
  * @param {Response} res - The Express response object.
- * @param {NextFunction} next - The next middleware function in the stack.
  */
-const errorHandler = (err: Error, req: Request, res: Response, next: NextFunction) => {
+const errorHandler = (err: Error, req: Request, res: Response) => {
   console.log('ErrorHandler: Received error:', err);
 
   logger.error(`${req.method} ${req.url} - ${err.message}`, {

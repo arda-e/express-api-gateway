@@ -127,6 +127,7 @@ export const getMe = async (req: Request, res: Response, next: NextFunction): Pr
   }
 };
 
+//!TODO: Add to route
 export const updateUser = async (
   req: Request,
   res: Response,
@@ -160,6 +161,8 @@ export const updateUser = async (
   }
 };
 
+//!TODO: Add to route
+//?TODO: What if the user tries to delete itself
 export const deleteUser = async (
   req: Request,
   res: Response,
@@ -205,7 +208,7 @@ export const changePassword = async (
   try {
     const { password, newPassword } = req.body as ChangePasswordRequestDTO;
 
-    const userId = req.session?.userId || req.user?.id; // Adjust according to your auth setup
+    const userId = req.session?.userId || req.user?.id;
     if (!userId) throw new AuthenticationError('Authentication required');
 
     const user = await authService.getMe(userId);

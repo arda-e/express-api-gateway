@@ -1,8 +1,7 @@
 import Role from '@api/v1/role/models/role.model';
 import { KnexRepository } from '@utils/Repository';
 import { inject, injectable } from 'tsyringe';
-
-import DatabaseManager from '../../../../db/db.manager';
+import DatabaseManager from '@db/db.manager';
 
 @injectable()
 class RoleRepository extends KnexRepository<Role> {

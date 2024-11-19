@@ -9,7 +9,7 @@ import Permission from './permission.model';
 
 const permissionService = container.resolve(PermissionService);
 
-export const getPermissions: RequestHandler = async (req, res, next) => {
+export const getPermissions: RequestHandler = async (_req, res, next) => {
   try {
     const permissions = await permissionService.getPermissions();
     res

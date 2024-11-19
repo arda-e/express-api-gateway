@@ -6,7 +6,7 @@ import { ResponseBuilder } from '@utils/ResponseBuilder';
 import RoleService from './role.service';
 
 const roleService = container.resolve(RoleService);
-export const getRoles = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getRoles = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const roles = await roleService.getRoles();
     const response = new ResponseBuilder()

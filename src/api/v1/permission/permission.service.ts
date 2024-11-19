@@ -1,7 +1,7 @@
 import { injectable, inject } from 'tsyringe';
-import Permission from '@api/v1/permission/permission.model';
 import { ResourceAlreadyExistsError, ResourceDoesNotExistError } from '@utils/errors';
 
+import Permission from './permission.model';
 import PermissionRepository from './permission.repository';
 
 @injectable()

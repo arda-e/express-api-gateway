@@ -31,6 +31,7 @@ class KnexAdapter extends DbAdapter<Knex> {
     await this.instance!.raw('SELECT 1');
   }
 
+  //!TODO: Check if this method is going to be used anywhere if not delete method
   async createTransaction(): Promise<Knex.Transaction> {
     return this.instance!.transaction();
   }

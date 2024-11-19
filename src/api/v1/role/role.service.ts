@@ -1,17 +1,9 @@
-import { injectable, inject } from 'tsyringe';
-import Role from '@api/v1/role/models/role.model';
-import {
-  DatabaseError,
-  ResourceAlreadyExistsError,
-  ResourceDoesNotExistError,
-} from '@utils/errors';
-import { AuthRepository } from '@api/v1/auth/';
-import User from '@api/v1/auth/auth.model';
-import RolePermissionRepository from '@api/v1/role/repositories/role-permissions.repository';
-import { RolePermission, RoleUser } from '@api/v1/role/models';
-
-import RoleRepository from './repositories/role-user.repository';
-import UserRoleRepository from './repositories/role-user.repository';
+import { inject, injectable } from 'tsyringe';
+import { Role, RolePermission } from '@api/v1/role/models';
+import { DatabaseError, ResourceDoesNotExistError } from '@utils/errors';
+import { StatusCodes } from 'http-status-codes';
+import { RolePermissionRepository, RoleRepository } from '@api/v1/role/repositories';
+import AuthRepository from '@api/v1/auth/auth.repository';
 
 @injectable()
 class RoleService {
@@ -43,6 +35,7 @@ class RoleService {
     if (!existingRole) {
       throw new ResourceDoesNotExistError('Role not found');
     }
+    return existingRole;
   }
 
   /**
@@ -70,7 +63,7 @@ class RoleService {
    */
   public async updateRole(roleId: string, role: Role): Promise<Role> {
     await this.ensureRoleExists(roleId);
-    return await this.roleRepository.update(roleId, role); //TODO
+    return await this.roleRepository.update(roleId, role);
   }
 
   /**
@@ -85,7 +78,7 @@ class RoleService {
     await this.roleRepository.deleteById(roleId);
   }
 
-  async assignRoleToUser(userId: string, roleId: string): Promise<User> {
+  async assignRoleToUser(userId: string, roleId: string): Promise<User | null> {
     try {
       await this.ensureRoleExists(roleId);
       const user = await this.authRepository.findById(userId);
@@ -98,7 +91,10 @@ class RoleService {
       if (error instanceof ResourceDoesNotExistError) {
         throw error;
       }
-      throw new DatabaseError(`Failed to assign role to user: ${error.message}`);
+      throw new DatabaseError(
+        `Failed to assign role to user: ${(error as Error)?.message}`,
+        StatusCodes.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -127,7 +123,7 @@ class RoleService {
    * @returns The existing role.
    * @throws {ResourceDoesNotExistError} If the role with the given ID does not exist.
    */
-  private async ensureRoleExists(roleId: string): Promise<RoleUser> {
+  private async ensureRoleExists(roleId: string): Promise<Role> {
     const existingRole = await this.roleRepository.findById(roleId);
     if (!existingRole) {
       throw new ResourceDoesNotExistError('Role not found');

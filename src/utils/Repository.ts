@@ -1,12 +1,10 @@
 import { Knex } from 'knex';
-import { DatabaseError } from '@utils/errors/DatabaseError';
 import { ResourceDoesNotExistError } from '@utils/errors';
 import { inject } from 'tsyringe';
 
 import DatabaseManager from '../db/db.manager';
 
 type InsertData<T> = Omit<T, 'id'>;
-type UpdateData<T> = Partial<Omit<T, 'id'>>;
 
 export abstract class KnexRepository<T extends { id: string }> {
   protected db: Knex;
@@ -49,32 +47,21 @@ export abstract class KnexRepository<T extends { id: string }> {
     return deletedCount > 0;
   }
 
-  async update(id: string, updateData: UpdateData<T>): Promise<T> {
+  async update(id: string, updateData: Partial<T>): Promise<T> {
     await this.findById(id);
+
+    if ('id' in updateData) {
+      throw new Error("Updating 'id' is not allowed");
+    }
 
     const [updatedItem] = await this.db<T>(this.getTableName())
       .where('id', id)
-      .update(updateData)
+      .update(updateData as Knex.DbRecord<T>)
       .returning('*');
     return updatedItem as T;
   }
 
   async findAll(): Promise<T[]> {
     return this.db(this.getTableName()).select('*');
-  }
-
-  async findManyByField<K extends keyof T>(field: K, values: T[K][]): Promise<T[]> {
-    try {
-      const results = await this.db<T>(this.getTableName()).whereIn(field as string, values);
-      return results;
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        throw new DatabaseError(
-          `Failed to find items by field ${field as string}: ${error.message}`,
-        );
-      } else {
-        throw new DatabaseError(`Failed to find items by field ${field as string}`);
-      }
-    }
   }
 }

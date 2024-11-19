@@ -133,6 +133,7 @@ class DatabaseManager {
     }
   }
 
+  //!TODO: Check if its going to be used anywhere and delete method if not required
   public getInitializationError(): Error | null {
     return this.initializationError;
   }

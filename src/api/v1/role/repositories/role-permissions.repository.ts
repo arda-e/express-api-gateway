@@ -1,9 +1,9 @@
 import { inject, injectable } from 'tsyringe';
 import { KnexRepository } from '@utils/Repository';
 import { DatabaseError } from '@utils/errors/DatabaseError';
+import DatabaseManager from '@db/db.manager';
 
 import { RolePermission } from '../models';
-import DatabaseManager from '../../../../db/db.manager';
 
 @injectable()
 class RolePermissionRepository extends KnexRepository<RolePermission> {

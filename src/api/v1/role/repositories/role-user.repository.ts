@@ -1,12 +1,11 @@
 import { inject, injectable } from 'tsyringe';
 import { KnexRepository } from '@utils/Repository';
-import { Role, RoleUser } from '@api/v1/role/models';
+import { ResourceDoesNotExistError } from '@utils/errors';
 import User from '@api/v1/auth/auth.model';
 import { AuthRepository } from '@api/v1/auth';
-import { ResourceDoesNotExistError } from '@utils/errors';
+import { Role, RoleUser } from '@api/v1/role/models';
 import { RoleRepository } from '@api/v1/role/repositories';
-
-import DatabaseManager from '../../../../db/db.manager';
+import DatabaseManager from '@db/db.manager';
 
 @injectable()
 class RoleUserRepository extends KnexRepository<RoleUser> {
