@@ -8,7 +8,6 @@ const router = Router();
 
 router.get('/', (req, res) => {
   res.status(201).json({ message: 'Welcome to the API!' });
-  res.status(500).json({ message: 'Welcome to the API!' });
 });
 
 router.use('/auth', authRoutes);
