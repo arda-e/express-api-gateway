@@ -4,12 +4,14 @@ import { container } from 'tsyringe';
 import { RedisManager } from '@utils/RedisManager';
 import DatabaseFactory from '@db/db.manager';
 import LoggerFactory from '@utils/Logger';
+import DatabaseManager from '@db/db.manager';
+import { AuthRepository, AuthService } from '@api/v1/auth';
 
 import SessionConfig from './sessionConfig';
 
 const logger = LoggerFactory.getLogger();
 
-export const initializeDependencies = async (
+export const initializeServerDependencies = async (
   sessionManager: SessionConfig = container.resolve(SessionConfig),
   databaseFactory: DatabaseFactory = container.resolve(DatabaseFactory),
 ): Promise<void> => {
@@ -30,5 +32,18 @@ export const initializeDependencies = async (
       logger.error('Failed to initialize dependencies: Unknown error');
     }
     throw error;
+  }
+};
+
+export const initializeAppDependencies = (): void => {
+  try {
+    logger.info('Initializing application dependencies...');
+    container.resolve(DatabaseManager);
+    container.resolve(AuthRepository);
+    container.resolve(AuthService);
+    logger.info('Application dependencies initialized successfully.');
+  } catch (error) {
+    logger.error('Failed to initialize application dependencies:', error);
+    throw error; // Ensure fatal errors propagate
   }
 };

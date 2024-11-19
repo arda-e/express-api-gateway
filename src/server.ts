@@ -1,9 +1,9 @@
 import { Server } from 'http';
-import LoggerFactory from '@utils/Logger';
-import { initializeDependencies } from '@config/dependencies';
-import SessionConfig from '@config/sessionConfig';
-import Config from '@config/config';
 import { container } from 'tsyringe';
+import LoggerFactory from '@utils/Logger';
+import Config from '@config/config';
+import { initializeServerDependencies } from '@config/dependencies';
+import SessionConfig from '@config/sessionConfig';
 
 import DatabaseManager from './db/db.manager';
 
@@ -32,7 +32,7 @@ const startServer = async (
   databaseFactory: DatabaseManager = container.resolve(DatabaseManager),
 ): Promise<Server> => {
   try {
-    await initializeDependencies(sessionConfig, databaseFactory);
+    await initializeServerDependencies(sessionConfig, databaseFactory);
     const { default: app } = await import('./app');
 
     const server: Server = app.listen(SERVER_PORT, () => {
