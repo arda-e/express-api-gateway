@@ -1,9 +1,12 @@
+//** EXTERNAL LIBRARIES
 import { RequestHandler } from 'express';
-import { container } from 'tsyringe';
 import { StatusCodes } from 'http-status-codes';
+import { container } from 'tsyringe';
+//** INTERNAL UTILS
 import { ResourceDoesNotExistError, ResourceAlreadyExistsError } from '@utils/errors';
 import { ErrorResponseBuilder, ResponseBuilder } from '@utils/ResponseBuilder';
 
+//** INTERNAL MODULES
 import PermissionService from './permission.service';
 import Permission from './permission.model';
 

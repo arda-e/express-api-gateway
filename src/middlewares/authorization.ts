@@ -1,7 +1,10 @@
+//** EXTERNAL LIBRARIES
 import { Request, Response, NextFunction, RequestHandler } from 'express';
 import { container } from 'tsyringe';
-import PermissionService from '@api/v1/permission/permission.service';
+//** INTERNAL UTILS
 import { AuthenticationError, AuthorizationError } from '@utils/errors';
+//** INTERNAL MODULES
+import PermissionService from '@api/v1/permission/permission.service';
 
 interface RequestWithUser extends Request {
   user?: {

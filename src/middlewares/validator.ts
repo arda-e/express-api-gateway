@@ -1,7 +1,9 @@
+//** EXTERNAL LIBRARIES
 import { Request, Response, NextFunction } from 'express';
-import { plainToInstance } from 'class-transformer';
 import { validateOrReject, ValidationError as ClassValidatorError } from 'class-validator';
+import { plainToInstance } from 'class-transformer';
 import { StatusCodes } from 'http-status-codes';
+//** INTERNAL UTILS
 import { ResponseBuilder } from '@utils/ResponseBuilder';
 
 /**

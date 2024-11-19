@@ -1,5 +1,5 @@
-import BaseModel from '@utils/Model';
 import { ArrayNotEmpty, IsArray, IsBoolean, IsOptional, IsString, Max, Min } from 'class-validator';
+import BaseModel from '@utils/Model';
 
 class Role extends BaseModel {
   @IsString()

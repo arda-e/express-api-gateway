@@ -1,5 +1,5 @@
-import BaseModel from '@utils/Model';
 import { IsUUID } from 'class-validator';
+import BaseModel from '@utils/Model';
 
 class RolePermission extends BaseModel {
   @IsUUID()

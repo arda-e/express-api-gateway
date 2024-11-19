@@ -1,5 +1,7 @@
+//** EXTERNAL LIBRARIES
 import { Knex } from 'knex';
 import { inject } from 'tsyringe';
+//** INTERNAL UTILS
 import DatabaseManager from '@db/db.manager';
 import { ResourceDoesNotExistError } from '@utils/errors';
 

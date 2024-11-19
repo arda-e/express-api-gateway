@@ -1,5 +1,5 @@
-import Model from '@utils/Model';
 import { IsUUID, IsNotEmpty } from 'class-validator';
+import Model from '@utils/Model';
 
 class RoleUser extends Model {
   @IsUUID()

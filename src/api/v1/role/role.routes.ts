@@ -1,7 +1,10 @@
+//** EXTERNAL LIBRARIES
 import { Router } from 'express';
+//** INTERNAL UTILS
 import { RoleActions } from '@utils/enums';
 import { authorization, validateRequest } from '@middlewares/';
 
+//** INTERNAL MODULES
 import * as RoleController from './role.controllers';
 import * as DTO from './role.dtos';
 

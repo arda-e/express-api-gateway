@@ -1,5 +1,7 @@
+//** EXTERNAL LIBRARIES
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
+//** INTERNAL UTILS
 import Logger from '@utils/Logger';
 import { AppError } from '@utils/errors/AppError';
 

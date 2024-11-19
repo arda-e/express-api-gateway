@@ -1,10 +1,13 @@
+//** EXTERNAL LIBRARIES
 import { singleton } from 'tsyringe';
-import Config from '@config/config';
+//** INTERNAL UTILS
 import Logger from '@utils/Logger';
+import Config from '@config/config';
 
+//** INTERNAL MODULES
 import KnexAdapter from './knex.adapter';
 import { Database } from './db.interface';
-
+//** CONSTANTS
 const MAX_RETRIES = Config.db.maxRetries;
 const RETRY_DELAY = Config.db.retryDelay;
 

@@ -1,8 +1,11 @@
+//** EXTERNAL LIBRARIES
 import { Request, Response, NextFunction } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { container } from 'tsyringe';
+//** INTERNAL UTILS
 import { ResponseBuilder } from '@utils/ResponseBuilder';
 
+//** INTERNAL MODULES
 import RoleService from './role.service';
 
 const roleService = container.resolve(RoleService);

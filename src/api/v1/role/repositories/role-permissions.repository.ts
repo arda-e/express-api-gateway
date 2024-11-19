@@ -1,8 +1,11 @@
+//** EXTERNAL LIBRARIES
 import { inject, injectable } from 'tsyringe';
+//** INTERNAL UTILS
+import DatabaseManager from '@db/db.manager';
 import { KnexRepository } from '@utils/Repository';
 import { DatabaseError } from '@utils/errors/DatabaseError';
-import DatabaseManager from '@db/db.manager';
 
+//** INTERNAL MODULES
 import { RolePermission } from '../models';
 
 @injectable()

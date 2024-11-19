@@ -1,18 +1,21 @@
-import { inject, injectable } from 'tsyringe';
+//** EXTERNAL LIBRARIES
 import { StatusCodes } from 'http-status-codes';
+import { inject, injectable } from 'tsyringe';
+//** INTERNAL UTILS
+import {
+  DatabaseError,
+  ResourceAlreadyExistsError,
+  ResourceDoesNotExistError,
+} from '@utils/errors';
+//** INTERNAL MODULES
+import User from '@api/v1/auth/auth.model';
+import AuthRepository from '@api/v1/auth/auth.repository';
 import { Role, RolePermission } from '@api/v1/role/models';
 import {
   RolePermissionRepository,
   RoleRepository,
   RoleUserRepository,
 } from '@api/v1/role/repositories';
-import AuthRepository from '@api/v1/auth/auth.repository';
-import User from '@api/v1/auth/auth.model';
-import {
-  DatabaseError,
-  ResourceAlreadyExistsError,
-  ResourceDoesNotExistError,
-} from '@utils/errors';
 
 @injectable()
 class RoleService {

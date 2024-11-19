@@ -1,12 +1,14 @@
+//** EXTERNAL LIBRARIES
 import { RequestHandler } from 'express';
 import session, { SessionOptions } from 'express-session';
-import { singleton, inject, container } from 'tsyringe';
-import { RedisClientType } from 'redis';
 import RedisStore from 'connect-redis';
+import { RedisClientType } from 'redis';
+import { singleton, inject, container } from 'tsyringe';
+//** INTERNAL UTILS
 import Config from '@config/config';
 import { RedisManager } from '@utils/RedisManager';
 import LoggerFactory from '@utils/Logger';
-
+//** CONSTANTS
 const SESSION_SECRET = Config.app.session.secret;
 const SESSION_COOKIE_MAX_AGE = Config.app.session.cookie.maxAge;
 const SESSION_ENVIRONMENT = Config.server.environment === 'production';
