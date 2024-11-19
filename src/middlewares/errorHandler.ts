@@ -4,6 +4,7 @@ import { StatusCodes } from 'http-status-codes';
 //** INTERNAL UTILS
 import Logger from '@utils/Logger';
 import { AppError } from '@utils/errors/AppError';
+import { ErrorResponseBuilder } from '@utils/ResponseBuilder';
 
 const logger = Logger.getLogger();
 
@@ -29,43 +30,30 @@ function isUserAuthenticated(req: Request): boolean {
  * @param {Response} res - The Express response object.
  */
 const errorHandler = (err: Error, req: Request, res: Response) => {
-  console.log('ErrorHandler: Received error:', err);
-
+  //** SERVER LOG
   logger.error(`${req.method} ${req.url} - ${err.message}`, {
     stack: err.stack,
     headers: req.headers,
     params: req.params,
     body: req.body,
   });
-
-  console.log('Error in errorHandler:', err);
-
+  //** HTTP RESPONSE
   if (!isUserAuthenticated(req)) {
-    //!TODO: Use response builder
-    return res.status(StatusCodes.UNAUTHORIZED).json({
-      status: 'error',
-      statusCode: StatusCodes.UNAUTHORIZED,
-      message: 'Unauthorized',
-    });
+    const response = new ErrorResponseBuilder(StatusCodes.UNAUTHORIZED, 'Unauthorized');
+    return res.status(response.getStatusCode).json(response);
   }
 
   if (err instanceof AppError) {
-    console.log('ErrorHandler: Handling AppError');
-    //!TODO: Use response builder
-    return res.status(err.statusCode).json({
-      status: 'error',
-      statusCode: err.statusCode,
-      message: err.message,
-    });
+    const response = new ErrorResponseBuilder(err.statusCode, err.message);
+    return res.status(response.getStatusCode).json(response);
   }
 
-  console.log('ErrorHandler: Unhandled error type');
-  //!TODO: Use response builder
-  return res.status(500).json({
-    status: 'error',
-    statusCode: 500,
-    message: 'Internal Server Error',
-  });
+  const response = new ErrorResponseBuilder(
+    StatusCodes.INTERNAL_SERVER_ERROR,
+    'Internal Server Error',
+  );
+
+  return res.status(response.getStatusCode).json(response);
 };
 
 export default errorHandler;
