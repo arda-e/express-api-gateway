@@ -1,12 +1,11 @@
 import { RequestHandler } from 'express';
-import Config from '@config/config';
-import { singleton, inject, container } from 'tsyringe';
 import session, { SessionOptions } from 'express-session';
-import RedisStore from 'connect-redis';
-import { RedisManager } from '@utils/RedisManager';
+import { singleton, inject, container } from 'tsyringe';
 import { RedisClientType } from 'redis';
-
-import LoggerFactory from '../utils/Logger';
+import RedisStore from 'connect-redis';
+import Config from '@config/config';
+import { RedisManager } from '@utils/RedisManager';
+import LoggerFactory from '@utils/Logger';
 
 const SESSION_SECRET = Config.app.session.secret;
 const SESSION_COOKIE_MAX_AGE = Config.app.session.cookie.maxAge;

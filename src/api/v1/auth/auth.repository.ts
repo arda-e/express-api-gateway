@@ -1,8 +1,11 @@
+//** EXTERNAL LIBRARIES
 import { inject, injectable } from 'tsyringe';
-import { KnexRepository } from '@utils/Repository';
-import { Role, RoleUser } from '@api/v1/role/models';
-import { handleDatabaseError } from '@utils/databaseErrorHandler';
+//** INTERNAL UTILS
 import DatabaseManager from '@db/db.manager';
+import { KnexRepository } from '@utils/Repository';
+import { handleDatabaseError } from '@utils/databaseErrorHandler';
+//** LOCAL MODULES
+import { Role, RoleUser } from '@api/v1/role/models';
 
 import User from './auth.model';
 

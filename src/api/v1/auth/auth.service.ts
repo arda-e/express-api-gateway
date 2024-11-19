@@ -1,16 +1,20 @@
+//** EXTERNAL LIBRARIES
+import bcrypt from 'bcryptjs';
 import { inject, injectable } from 'tsyringe';
+//** INTERNAL UTILS
 import {
   AuthenticationError,
   ResourceDoesNotExistError,
   UniqueConstraintError,
   ValidationError,
 } from '@utils/errors';
-// import RoleRepository from '@api/v1/role/repositories/role.repository';
-import bcrypt from 'bcryptjs';
 
+//** INTERNAL MODULES
 import User from './auth.model';
+import * as DTO from './auth.dtos';
 import AuthRepository from './auth.repository';
-import { UpdateUserRequestDTO } from './auth.dtos';
+
+// import RoleRepository from '@api/v1/role/repositories/role.repository';
 
 @injectable()
 export class AuthService {
@@ -61,7 +65,7 @@ export class AuthService {
     return user;
   }
 
-  async updateUser(userId: string, updateData: UpdateUserRequestDTO): Promise<User> {
+  async updateUser(userId: string, updateData: DTO.UpdateUserRequestDTO): Promise<User> {
     const user = await this.authRepository.findById(userId);
     if (!user) {
       throw new ResourceDoesNotExistError('User not found');

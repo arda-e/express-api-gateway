@@ -1,22 +1,19 @@
 import { Router } from 'express';
 
+//** INTERNAL MODULES
 import * as AuthController from './auth.controller';
-import { validateRequest } from '../../../middlewares';
-import {
-  LoginUserRequestDTO,
-  RegisterUserRequestDTO,
-  ChangePasswordRequestDTO,
-  // UpdateUserRequestDTO,
-} from './auth.dtos';
+import * as DTO from './auth.dtos';
+//** INTERNAL UTILS
+import { validateRequest } from '@/middlewares';
 
 const router = Router();
 
-router.post('/login', validateRequest(LoginUserRequestDTO), AuthController.login);
-router.post('/register', validateRequest(RegisterUserRequestDTO), AuthController.register);
+router.post('/login', validateRequest(DTO.LoginUserRequestDTO), AuthController.login);
+router.post('/register', validateRequest(DTO.RegisterUserRequestDTO), AuthController.register);
 router.post('/logout', AuthController.logout);
 router.patch(
   '/change-password',
-  validateRequest(ChangePasswordRequestDTO),
+  validateRequest(DTO.ChangePasswordRequestDTO),
   AuthController.changePassword,
 );
 

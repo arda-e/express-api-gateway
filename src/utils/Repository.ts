@@ -1,8 +1,7 @@
 import { Knex } from 'knex';
-import { ResourceDoesNotExistError } from '@utils/errors';
 import { inject } from 'tsyringe';
-
-import DatabaseManager from '../db/db.manager';
+import DatabaseManager from '@db/db.manager';
+import { ResourceDoesNotExistError } from '@utils/errors';
 
 type InsertData<T> = Omit<T, 'id'>;
 

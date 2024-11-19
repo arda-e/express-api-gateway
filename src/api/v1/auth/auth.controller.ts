@@ -1,30 +1,28 @@
+//** EXTERNAL LIBRARIES
+import bcrypt from 'bcryptjs';
 import { NextFunction, Request, Response } from 'express';
+import 'express-session';
+import { StatusCodes } from 'http-status-codes';
 import { container } from 'tsyringe';
-import { AppError } from '@utils/errors/AppError';
+//** INTERNAL UTILS
 import {
   UniqueConstraintError,
   ResourceDoesNotExistError,
   AuthenticationError,
+  AppError,
 } from '@utils/errors/';
-import 'express-session';
-import { StatusCodes } from 'http-status-codes';
 import { ResponseBuilder, ErrorResponseBuilder } from '@utils/ResponseBuilder';
-import bcrypt from 'bcryptjs';
 
+//** LOCAL MODULES
+import * as DTO from './auth.dtos';
 import AuthService from './auth.service';
-import {
-  ChangePasswordRequestDTO,
-  LoginUserRequestDTO,
-  RegisterUserRequestDTO,
-  UpdateUserRequestDTO,
-} from './auth.dtos';
 
 const authService = container.resolve(AuthService);
 
 export const register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   console.log('AuthController: Received registration request');
   try {
-    const { username, email, password } = req.body as RegisterUserRequestDTO;
+    const { username, email, password } = req.body as DTO.RegisterUserRequestDTO;
 
     const user = await authService.register(username, email, password);
 
@@ -54,7 +52,7 @@ export const register = async (req: Request, res: Response, next: NextFunction):
 
 export const login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { email, password } = req.body as LoginUserRequestDTO;
+    const { email, password } = req.body as DTO.LoginUserRequestDTO;
     const user = await authService.login(email, password);
     req.session.userId = user.id;
     res
@@ -135,7 +133,7 @@ export const updateUser = async (
 ): Promise<void> => {
   try {
     const userId = req.session.userId;
-    const updateData = req.body as UpdateUserRequestDTO;
+    const updateData = req.body as DTO.UpdateUserRequestDTO;
     const updatedUser = await authService.updateUser(userId!, updateData);
 
     res
@@ -206,7 +204,7 @@ export const changePassword = async (
   next: NextFunction,
 ): Promise<void> => {
   try {
-    const { password, newPassword } = req.body as ChangePasswordRequestDTO;
+    const { password, newPassword } = req.body as DTO.ChangePasswordRequestDTO;
 
     const userId = req.session?.userId || req.user?.id;
     if (!userId) throw new AuthenticationError('Authentication required');

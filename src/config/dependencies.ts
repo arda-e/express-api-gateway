@@ -1,9 +1,9 @@
-import { RedisManager } from '@utils/RedisManager';
 import { container } from 'tsyringe';
+import { RedisManager } from '@utils/RedisManager';
+import DatabaseFactory from '@db/db.manager';
+import LoggerFactory from '@utils/Logger';
 
 import SessionConfig from './sessionConfig';
-import DatabaseFactory from '../db/db.manager';
-import LoggerFactory from '../utils/Logger';
 
 const logger = LoggerFactory.getLogger();
 

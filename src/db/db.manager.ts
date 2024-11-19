@@ -1,9 +1,9 @@
-import Logger from '@utils/Logger';
 import { singleton } from 'tsyringe';
 import Config from '@config/config';
+import Logger from '@utils/Logger';
 
-import { Database } from './db.interface';
 import KnexAdapter from './knex.adapter';
+import { Database } from './db.interface';
 
 const MAX_RETRIES = Config.db.maxRetries;
 const RETRY_DELAY = Config.db.retryDelay;

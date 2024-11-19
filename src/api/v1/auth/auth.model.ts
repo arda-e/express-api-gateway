@@ -1,8 +1,10 @@
+//** EXTERNAL LIBRARIES
 import bcrypt from 'bcryptjs';
-import BaseModel from '@utils/Model';
 import { IsArray, IsEmail, IsString, Length, ValidateNested } from 'class-validator';
-import Role from '@api/v1/role/models/role.model';
 import { Type } from 'class-transformer';
+//** LOCAL MODULES
+import BaseModel from '@utils/Model';
+import Role from '@api/v1/role/models/role.model';
 
 class User extends BaseModel {
   @IsString()
