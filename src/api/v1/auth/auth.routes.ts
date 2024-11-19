@@ -1,10 +1,10 @@
 import { Router } from 'express';
-
 //** INTERNAL MODULES
+import { validateRequest } from '@middlewares';
+
 import * as AuthController from './auth.controller';
 import * as DTO from './auth.dtos';
 //** INTERNAL UTILS
-import { validateRequest } from '@/middlewares';
 
 const router = Router();
 

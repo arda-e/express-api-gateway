@@ -21,6 +21,7 @@
       "@api/*": ["api/*"],
       "@db/*": ["db/*"],
       "@config/*": ["config/*"],
+      "@middlewares": ["middlewares"],
       "@middlewares/*": ["middlewares/*"]
     }
   },
