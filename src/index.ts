@@ -12,6 +12,6 @@ dotenv.config();
     console.log('Server started successfully.');
   } catch (error) {
     console.error('Failed to start the server:', error);
-    process.exit(1); // Exit with failure code
+    process.exit(1);
   }
 })();
