@@ -1,7 +1,10 @@
-import Permission from '@api/v1/permission/permission.model';
-import { KnexRepository } from '@utils/Repository';
+//** EXTERNAL LIBRARIES
 import { inject, injectable } from 'tsyringe';
+//** INTERNAL UTILS
+import { KnexRepository } from '@utils/Repository';
 import DatabaseManager from '@db/db.manager';
+//** INTERNAL MODULES
+import Permission from '@api/v1/permission/permission.model';
 
 @injectable()
 class PermissionRepository extends KnexRepository<Permission> {

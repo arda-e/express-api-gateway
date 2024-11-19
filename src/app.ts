@@ -13,7 +13,7 @@ app.use(express.json());
 app.use(middlewares.logger);
 
 app.use(getSessionMiddleware());
-
+//!TODO: Change to logger
 try {
   // Check resolving DatabaseManager
   console.log('Resolving DatabaseManager...');

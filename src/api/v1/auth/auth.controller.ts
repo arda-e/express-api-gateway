@@ -20,7 +20,6 @@ import AuthService from './auth.service';
 const authService = container.resolve(AuthService);
 
 export const register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  console.log('AuthController: Received registration request');
   try {
     const { username, email, password } = req.body as DTO.RegisterUserRequestDTO;
 
@@ -37,7 +36,6 @@ export const register = async (req: Request, res: Response, next: NextFunction):
           .build(),
       );
   } catch (error) {
-    console.log('AuthController: Error during registration:', error);
     if (error instanceof UniqueConstraintError) {
       res
         .status(error.statusCode)

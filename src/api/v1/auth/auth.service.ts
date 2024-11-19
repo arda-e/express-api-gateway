@@ -25,6 +25,7 @@ export class AuthService {
     const existingUser = await this.authRepository.findByEmail(email);
 
     if (existingUser) {
+      //!TODO: Convert to logger
       console.log('AuthService: User already exists, throwing error');
       throw new UniqueConstraintError('User already exists');
     }
@@ -36,7 +37,7 @@ export class AuthService {
       ['cbd0bdfe-6240-4a9d-8882-e1df7a9938ed'],
       // !TODO: Replace with the actual role ID
     );
-
+    //!TODO: Convert to logger
     console.log('AuthService: Registration successful');
     return newUser;
   }
