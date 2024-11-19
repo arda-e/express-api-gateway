@@ -24,9 +24,9 @@ class RolePermissionRepository extends KnexRepository<RolePermission> {
       return await this.create(rolePermission);
     } catch (error: unknown) {
       if (error instanceof Error) {
-        throw new DatabaseError(`Failed to assign permission: ${error.message}`);
+        throw new DatabaseError(`Failed to assign permission: ${error.message}`, 500);
       } else {
-        throw new DatabaseError('Failed to assign permission to role: Unknown error');
+        throw new DatabaseError('Failed to assign permission to role: Unknown error', 500);
       }
     }
   }
@@ -38,9 +38,9 @@ class RolePermissionRepository extends KnexRepository<RolePermission> {
         .delete();
     } catch (error: unknown) {
       if (error instanceof Error) {
-        throw new DatabaseError(`Failed to remove permission to role: ${error.message}`);
+        throw new DatabaseError(`Failed to remove permission to role: ${error.message}`, 500);
       } else {
-        throw new DatabaseError('Failed to remove permission to role: Unknown error');
+        throw new DatabaseError('Failed to remove permission to role: Unknown error', 500);
       }
     }
   }
@@ -50,9 +50,9 @@ class RolePermissionRepository extends KnexRepository<RolePermission> {
       return await this.db(this.getTableName()).where('role_id', roleId);
     } catch (error: unknown) {
       if (error instanceof Error) {
-        throw new DatabaseError(`Failed to get role permissions: ${error.message}`);
+        throw new DatabaseError(`Failed to get role permissions: ${error.message}`, 500);
       } else {
-        throw new DatabaseError('Failed to get role permissions: Unknown error');
+        throw new DatabaseError('Failed to get role permissions: Unknown error', 500);
       }
     }
   }
@@ -62,9 +62,9 @@ class RolePermissionRepository extends KnexRepository<RolePermission> {
       return await this.db(this.getTableName()).where('permission_id', permissionId);
     } catch (error: unknown) {
       if (error instanceof Error) {
-        throw new DatabaseError(`Failed to get permission roles: ${error.message}`);
+        throw new DatabaseError(`Failed to get permission roles: ${error.message}`, 500);
       } else {
-        throw new DatabaseError('Failed to get permission roles: Unknown error');
+        throw new DatabaseError('Failed to get permission roles: Unknown error', 500);
       }
     }
   }
