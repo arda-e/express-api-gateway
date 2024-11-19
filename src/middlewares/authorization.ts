@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express';
-import { AuthenticationError, AuthorizationError } from '@utils/errors';
 import { container } from 'tsyringe';
 import PermissionService from '@api/v1/permission/permission.service';
+import { AuthenticationError, AuthorizationError } from '@utils/errors';
 
 interface RequestWithUser extends Request {
   user?: {

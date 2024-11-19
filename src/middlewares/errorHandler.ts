@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import { AppError } from '@utils/errors/AppError';
-import Logger from '@utils/Logger';
 import { StatusCodes } from 'http-status-codes';
+import Logger from '@utils/Logger';
+import { AppError } from '@utils/errors/AppError';
 
 const logger = Logger.getLogger();
 

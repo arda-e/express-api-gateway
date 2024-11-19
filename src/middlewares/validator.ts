@@ -1,7 +1,6 @@
-import { plainToInstance } from 'class-transformer';
-import { validateOrReject } from 'class-validator';
 import { Request, Response, NextFunction } from 'express';
-import { ValidationError as ClassValidatorError } from 'class-validator';
+import { plainToInstance } from 'class-transformer';
+import { validateOrReject, ValidationError as ClassValidatorError } from 'class-validator';
 import { StatusCodes } from 'http-status-codes';
 import { ResponseBuilder } from '@utils/ResponseBuilder';
 
