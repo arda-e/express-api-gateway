@@ -8,8 +8,12 @@ import PermissionRepository from './permission.repository';
 class PermissionService {
   constructor(@inject(PermissionRepository) private permissionRepository: PermissionRepository) {}
 
-  public async getPermissions(): Promise<Permission[]> {
-    return await this.permissionRepository.findAll();
+  public async getPermissions(
+    page: number,
+    limit: number,
+  ): Promise<{ permissions: Permission[]; total: number }> {
+    const { data, total } = await this.permissionRepository.findAllPaginated(page, limit);
+    return { permissions: data, total };
   }
 
   public async getPermission(permissionId: string): Promise<Permission | null> {

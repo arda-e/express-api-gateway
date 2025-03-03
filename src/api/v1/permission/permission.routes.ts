@@ -12,7 +12,11 @@ const router = Router();
 
 router
   .route('/')
-  .get(authorization([PermissionActions.READ_PERMISSION]), PermissionController.getPermissions)
+  .get(
+    validateRequest(DTO.GetPermissionsDTO),
+    authorization([PermissionActions.READ_PERMISSION]),
+    PermissionController.getPermissions,
+  )
   .post(
     validateRequest(DTO.CreatePermissionDTO),
     authorization([PermissionActions.CREATE_PERMISSION]),

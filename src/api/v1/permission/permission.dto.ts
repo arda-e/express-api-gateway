@@ -1,5 +1,6 @@
 import { IsString, IsOptional, MinLength, MaxLength, IsEnum, IsUUID } from 'class-validator';
 import { PermissionActions } from '@utils/enums';
+import { PaginationDTO } from '@utils/dtos/';
 
 /** Base DTO for permissions with ID */
 export class BasePermissionDTO {
@@ -36,3 +37,5 @@ export class GetPermissionByIdDTO extends BasePermissionDTO {}
 
 /** DTO for deleting a permission by ID */
 export class DeletePermissionByIdDTO extends BasePermissionDTO {}
+
+export class GetPermissionsDTO extends PaginationDTO {}

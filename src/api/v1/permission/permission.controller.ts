@@ -5,8 +5,9 @@ import { container } from 'tsyringe';
 //** INTERNAL UTILS
 import { ResourceDoesNotExistError, ResourceAlreadyExistsError } from '@utils/errors';
 import { ErrorResponseBuilder, ResponseBuilder } from '@utils/ResponseBuilder';
-
 //** INTERNAL MODULES
+import { GetPermissionsDTO } from '@api/v1/permission/permission.dto';
+
 import PermissionService from './permission.service';
 import Permission from './permission.model';
 
@@ -14,17 +15,27 @@ const permissionService = container.resolve(PermissionService);
 
 export const getPermissions: RequestHandler = async (_req, res, next) => {
   try {
-    const permissions = await permissionService.getPermissions();
-    res
-      .status(StatusCodes.OK)
-      .json(
-        new ResponseBuilder()
-          .setStatus('success')
-          .setStatusCode(StatusCodes.OK)
-          .setMessage('Permissions retrieved successfully')
-          .setData(permissions)
-          .build(),
-      );
+    const { page, limit } = req.query as unknown as GetPermissionsDTO;
+    const pageNumber = page ?? 1;
+    const limitNumber = limit ?? 10;
+
+    const { permissions, total } = await permissionService.getPermissions(pageNumber, limitNumber);
+
+    res.status(StatusCodes.OK).json(
+      new ResponseBuilder()
+        .setStatus('success')
+        .setStatusCode(StatusCodes.OK)
+        .setMessage('Permissions retrieved successfully')
+        .setData({
+          permissions,
+          pagination: {
+            page: pageNumber,
+            limit: limitNumber,
+            totalPages: Math.ceil(total / limitNumber),
+          },
+        })
+        .build(),
+    );
   } catch (error) {
     if (error instanceof ResourceDoesNotExistError) {
       res

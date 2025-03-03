@@ -15,6 +15,24 @@ class PermissionRepository extends KnexRepository<Permission> {
   getTableName(): string {
     return 'permissions';
   }
+
+  public async findAllPaginated(
+    page: number,
+    limit: number,
+  ): Promise<{ data: Permission[]; total: number }> {
+    const offset = (page - 1) * limit;
+    const query = this.db(this.getTableName());
+
+    const totalQuery = query.clone().count('*', { as: 'total' }).first();
+    const dataQuery = query.clone().limit(limit).offset(offset);
+
+    const [totalResult, data] = await Promise.all([totalQuery, dataQuery]);
+
+    return {
+      data,
+      total: Number(totalResult?.total || 0),
+    };
+  }
 }
 
 export default PermissionRepository;
