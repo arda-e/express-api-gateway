@@ -1,5 +1,5 @@
 interface IResponseBuilder {
-  setStatus(status: 'success' | 'error'): this;
+  setStatus(status: "success" | "error"): this;
 
   setStatusCode(statusCode: number): this;
 
@@ -15,7 +15,7 @@ interface IResponseBuilder {
 }
 
 interface IResponse {
-  status: 'success' | 'error';
+  status: "success" | "error";
   statusCode: number;
   message: string;
   data?: unknown;
@@ -29,14 +29,14 @@ interface IResponse {
  * various properties of the response.
  */
 export class ResponseBuilder implements IResponseBuilder {
-  private _status: 'success' | 'error' = 'success';
+  private _status: "success" | "error" = "success";
   private statusCode: number = 200;
-  private _message: string = '';
+  private _message: string = "";
   private _data: unknown = null;
   private _errorCode: string | null = null;
   private _errors: Array<{ field: string; errors: string[] }> | null = null;
 
-  public setStatus(status: 'success' | 'error'): this {
+  public setStatus(status: "success" | "error"): this {
     this._status = status;
     return this;
   }
@@ -81,7 +81,7 @@ export class ResponseBuilder implements IResponseBuilder {
       (response as IResponse).data = this._data;
     }
 
-    if (this._status === 'error' && this._errorCode) {
+    if (this._status === "error" && this._errorCode) {
       (response as IResponse).errorCode = this._errorCode;
     }
 
@@ -92,7 +92,7 @@ export class ResponseBuilder implements IResponseBuilder {
     return this.statusCode;
   }
 
-  public get status(): 'success' | 'error' {
+  public get status(): "success" | "error" {
     return this._status;
   }
 
@@ -131,6 +131,6 @@ export class ResponseBuilder implements IResponseBuilder {
 export class ErrorResponseBuilder extends ResponseBuilder {
   constructor(statusCode: number, message: string) {
     super();
-    this.setStatus('error').setStatusCode(Number(statusCode)).setMessage(message);
+    this.setStatus("error").setStatusCode(Number(statusCode)).setMessage(message);
   }
 }

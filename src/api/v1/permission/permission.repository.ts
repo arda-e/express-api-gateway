@@ -1,10 +1,10 @@
 //** EXTERNAL LIBRARIES
-import { inject, injectable } from 'tsyringe';
+import { inject, injectable } from "tsyringe";
 //** INTERNAL UTILS
-import { KnexRepository } from '@utils/Repository';
-import DatabaseManager from '@db/db.manager';
+import { KnexRepository } from "@utils/Repository";
+import DatabaseManager from "@db/db.manager";
 //** INTERNAL MODULES
-import Permission from '@api/v1/permission/permission.model';
+import Permission from "@api/v1/permission/permission.model";
 
 @injectable()
 class PermissionRepository extends KnexRepository<Permission> {
@@ -13,7 +13,7 @@ class PermissionRepository extends KnexRepository<Permission> {
   }
 
   getTableName(): string {
-    return 'permissions';
+    return "permissions";
   }
 
   public async findAllPaginated(
@@ -23,7 +23,7 @@ class PermissionRepository extends KnexRepository<Permission> {
     const offset = (page - 1) * limit;
     const query = this.db(this.getTableName());
 
-    const totalQuery = query.clone().count('*', { as: 'total' }).first();
+    const totalQuery = query.clone().count("*", { as: "total" }).first();
     const dataQuery = query.clone().limit(limit).offset(offset);
 
     const [totalResult, data] = await Promise.all([totalQuery, dataQuery]);

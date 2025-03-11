@@ -1,23 +1,23 @@
-import { createLogger, format, transports, Logger } from 'winston';
-import 'winston-daily-rotate-file';
+import { createLogger, format, transports, Logger } from "winston";
+import "winston-daily-rotate-file";
 
 class LoggerFactory {
   private static instance: Logger | null = null;
 
   private static createAsyncLogger(): Logger {
     return createLogger({
-      level: process.env.LOG_LEVEL || 'info',
+      level: process.env.LOG_LEVEL || "info",
       format: format.combine(format.timestamp(), format.json()),
       transports: [
         new transports.Console({
           handleExceptions: true,
         }),
         new transports.DailyRotateFile({
-          filename: process.env.LOG_FILE_PATH || 'app-%DATE%.log',
-          datePattern: 'YYYY-MM-DD',
+          filename: process.env.LOG_FILE_PATH || "app-%DATE%.log",
+          datePattern: "YYYY-MM-DD",
           zippedArchive: true,
-          maxSize: '20m',
-          maxFiles: '14d',
+          maxSize: "20m",
+          maxFiles: "14d",
           handleExceptions: true,
         }),
       ],
