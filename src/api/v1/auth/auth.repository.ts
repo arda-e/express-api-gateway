@@ -1,13 +1,13 @@
 //** EXTERNAL LIBRARIES
-import { inject, injectable } from 'tsyringe';
+import { inject, injectable } from "tsyringe";
 //** INTERNAL UTILS
-import DatabaseManager from '@db/db.manager';
-import { KnexRepository } from '@utils/Repository';
-import { handleDatabaseError } from '@utils/databaseErrorHandler';
+import DatabaseManager from "@db/db.manager";
+import { KnexRepository } from "@utils/Repository";
+import { handleDatabaseError } from "@utils/databaseErrorHandler";
 //** LOCAL MODULES
-import { Role, RoleUser } from '@api/v1/role/models';
+import { Role, RoleUser } from "@api/v1/role/models";
 
-import User from './auth.model';
+import { User } from "./auth.model";
 
 @injectable()
 class AuthRepository extends KnexRepository<User> {
@@ -16,7 +16,7 @@ class AuthRepository extends KnexRepository<User> {
   }
 
   getTableName(): string {
-    return 'authentication.users';
+    return "authentication.users";
   }
 
   async createUser(
@@ -26,7 +26,7 @@ class AuthRepository extends KnexRepository<User> {
     roleIds: string[],
   ): Promise<User> {
     try {
-      console.log('AuthRepository: Starting user creation');
+      console.log("AuthRepository: Starting user creation");
       const user = new User(undefined, username, email, password);
       await user.hashPassword();
       const [createdUser] = await this.db(this.getTableName())
@@ -35,10 +35,10 @@ class AuthRepository extends KnexRepository<User> {
           email: user.email,
           password: user.password,
         })
-        .returning('*');
+        .returning("*");
 
       if (roleIds?.length > 0) {
-        await this.db('authentication.user_roles').insert(
+        await this.db("authentication.user_roles").insert(
           roleIds.map((roleId) => new RoleUser(undefined, createdUser.id, roleId)),
         );
       }
@@ -72,10 +72,10 @@ class AuthRepository extends KnexRepository<User> {
   }
 
   private async getUserRoles(userId: string): Promise<Role[]> {
-    return this.db('authentication.roles')
-      .join('authentication.user_roles', 'roles.id', 'user_roles.role_id')
-      .where('user_roles.user_id', userId)
-      .select('roles.*');
+    return this.db("authentication.roles")
+      .join("authentication.user_roles", "roles.id", "user_roles.role_id")
+      .where("user_roles.user_id", userId)
+      .select("roles.*");
   }
 }
 
