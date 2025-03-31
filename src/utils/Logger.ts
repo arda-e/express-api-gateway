@@ -1,9 +1,19 @@
 import { createLogger, format, transports, Logger } from "winston";
 import "winston-daily-rotate-file";
 
+/**
+ * Provides a singleton logger factory for creating and managing a Winston logger instance.
+ * Configures logging with console and file transports, supporting environment-based log levels.
+ */
 class LoggerFactory {
   private static instance: Logger | null = null;
 
+  /**
+   * Creates an asynchronous logger instance with console and daily rotate file transports.
+   * Configures logging level from environment, adds timestamp, and uses JSON format.
+   * @returns {Logger} A configured Winston logger instance
+   * @private
+   * */
   private static createAsyncLogger(): Logger {
     return createLogger({
       level: process.env.LOG_LEVEL || "info",

@@ -286,6 +286,7 @@ export const updateUser = async (
           .build(),
       );
   } catch (error) {
+    // !TODO: Use ErrorResponseBuilder
     if (error instanceof ResourceDoesNotExistError) {
       res.status(error.statusCode).json({
         status: "error",
@@ -314,6 +315,7 @@ export const deleteUser = async (
       if (err) {
         return next(new AppError(500, "Error during session destruction after user deletion"));
       }
+      //!TODO: Use response builder
       res.clearCookie("connect.sid");
       const response = {
         status: "success",
@@ -367,7 +369,13 @@ export const changePassword = async (
       .build();
 
     res.status(response.statusCode).json(response);
-  } catch (error) {
-    next(error);
+  } catch (error: unknown) {
+    if (error instanceof AuthenticationError) {
+      res
+        .status(StatusCodes.UNAUTHORIZED)
+        .json(new ErrorResponseBuilder(StatusCodes.UNAUTHORIZED, error.message).build());
+    } else {
+      next(error);
+    }
   }
 };
