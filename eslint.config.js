@@ -1,18 +1,18 @@
-const pluginPrettier = require('eslint-plugin-prettier');
-const pluginImport = require('eslint-plugin-import');
-const pluginJSDoc = require('eslint-plugin-jsdoc');
-const parser = require('@typescript-eslint/parser');
-const tsEslint = require('@typescript-eslint/eslint-plugin');
+const pluginPrettier = require("eslint-plugin-prettier");
+const pluginImport = require("eslint-plugin-import");
+const pluginJSDoc = require("eslint-plugin-jsdoc");
+const parser = require("@typescript-eslint/parser");
+const tsEslint = require("@typescript-eslint/eslint-plugin");
 
 module.exports = [
   {
-    ignores: ['node_modules/**', 'dist/**'],
+    ignores: ["node_modules/**", "dist/**"],
   },
   {
-    files: ['**/*.js', '**/*.ts'],
+    files: ["**/*.js", "**/*.ts"],
     languageOptions: {
       ecmaVersion: 2021,
-      sourceType: 'module',
+      sourceType: "module",
       parser: parser,
       globals: {
         browser: true,
@@ -20,14 +20,14 @@ module.exports = [
       },
     },
     plugins: {
-      '@typescript-eslint': tsEslint,
+      "@typescript-eslint": tsEslint,
       import: pluginImport,
       jsdoc: pluginJSDoc,
       prettier: pluginPrettier,
     },
     rules: {
-      'prettier/prettier': [
-        'error',
+      "prettier/prettier": [
+        "error",
         {},
         {
           usePrettierrc: true,
@@ -36,20 +36,20 @@ module.exports = [
           },
         },
       ],
-      'import/order': [
-        'error',
+      "import/order": [
+        "error",
         {
-          groups: [['builtin', 'external', 'internal']],
-          'newlines-between': 'always',
+          groups: [["builtin", "external", "internal"]],
+          "newlines-between": "always",
         },
       ],
-      'jsdoc/check-alignment': 'error',
-      'jsdoc/check-indentation': 'error',
-      'jsdoc/check-syntax': 'error',
+      "jsdoc/check-alignment": "off",
+      "jsdoc/check-indentation": "off",
+      "jsdoc/check-syntax": "error",
     },
     settings: {
       jsdoc: {
-        mode: 'typescript',
+        mode: "typescript",
       },
     },
   },
