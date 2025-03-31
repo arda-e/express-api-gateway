@@ -26,7 +26,6 @@ class AuthRepository extends KnexRepository<User> {
     roleIds: string[],
   ): Promise<User> {
     try {
-      console.log("AuthRepository: Starting user creation");
       const user = new User(undefined, username, email, password);
       await user.hashPassword();
       const [createdUser] = await this.db(this.getTableName())

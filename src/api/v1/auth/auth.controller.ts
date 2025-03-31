@@ -8,6 +8,7 @@ import { container, injectable, delay, inject } from "tsyringe";
 import { AuthenticationError, AppError, InternalServerError } from "@utils/errors/";
 import { ResponseBuilder } from "@utils/ResponseBuilder";
 import { Controller } from "@utils/decorators/Controller";
+import { ManualErrorLogging } from "@utils/decorators/CustomErrorHandling";
 
 // LOCAL MODULES
 import * as DTO from "./auth.dtos";
@@ -76,6 +77,9 @@ export class AuthController {
   };
 
   /**
+   * Example of a method with manual error logging
+   * This method handles sensitive information, so it implements custom error logging
+   *
    * @openapi
    * /api/v1/auth/login:
    *   post:
@@ -112,7 +116,7 @@ export class AuthController {
    *             schema:
    *               $ref: '#/components/schemas/error.AuthenticationError'
    */
-  public login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public async login(req: Request, res: Response, next: NextFunction): Promise<void> {
     const { email, password } = req.body as DTO.LoginUserRequestDTO;
     const user = await this.authService.login(email, password);
     req.session.userId = user.id;
@@ -126,7 +130,7 @@ export class AuthController {
           .setData(user)
           .build(),
       );
-  };
+  }
 
   /**
    * @openapi

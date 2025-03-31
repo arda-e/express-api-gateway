@@ -8,6 +8,7 @@ import {
   UniqueConstraintError,
   ValidationError,
 } from "@utils/errors";
+import { Catch } from "@utils/decorators";
 
 //** INTERNAL MODULES
 import { User } from "./auth.model";
@@ -20,6 +21,7 @@ import AuthRepository from "./auth.repository";
 export class AuthService {
   constructor(@inject(AuthRepository) private authRepository: AuthRepository) {}
 
+  @Catch("Failed to register user")
   async register(username: string, email: string, password: string): Promise<User> {
     console.log("AuthService: Starting registration");
     const existingUser = await this.authRepository.findByEmail(email);
@@ -42,6 +44,7 @@ export class AuthService {
     return newUser;
   }
 
+  @Catch("Failed to login user")
   async login(email: string, password: string): Promise<User> {
     const user = await this.authRepository.findByEmail(email);
 
@@ -58,6 +61,7 @@ export class AuthService {
     return user;
   }
 
+  @Catch("Failed to retrieve user")
   async getMe(userId: string): Promise<User> {
     const user = await this.authRepository.findById(userId);
     if (!user) {
@@ -66,6 +70,7 @@ export class AuthService {
     return user;
   }
 
+  @Catch("Failed to update user")
   async updateUser(userId: string, updateData: DTO.UpdateUserRequestDTO): Promise<User> {
     const user = await this.authRepository.findById(userId);
     if (!user) {
@@ -75,13 +80,14 @@ export class AuthService {
     if (updateData.email && updateData.email !== user.email) {
       const existingUser = await this.authRepository.findByEmail(updateData.email);
       if (existingUser) {
-        throw new UniqueConstraintError("email", "Email already in use");
+        throw new UniqueConstraintError("Email already in use");
       }
     }
 
     return await this.authRepository.update(userId, updateData);
   }
 
+  @Catch("Failed to delete user")
   async deleteUser(userId: string): Promise<boolean> {
     const user = await this.authRepository.findById(userId);
     if (!user) {
@@ -90,6 +96,7 @@ export class AuthService {
     return await this.authRepository.deleteById(userId);
   }
 
+  // Revert to original implementation for this security-critical method
   async validatePassword(plainTextPassword: string, hashedPassword: string): Promise<boolean> {
     try {
       return await bcrypt.compare(plainTextPassword, hashedPassword);

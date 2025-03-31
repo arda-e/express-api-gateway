@@ -1,14 +1,13 @@
-import {
-  UniqueConstraintError,
-  ResourceDoesNotExistError,
-  AuthenticationError,
-} from "@utils/errors";
+import { createControllerMethodWrapper } from "@utils/handlers/ControllerHandlers";
+import { handleControllerError } from "@utils/handlers/errorHandlerUtil";
 import { ErrorResponseBuilder } from "@utils/ResponseBuilder";
-import { StatusCodes } from "http-status-codes";
+
+import { MANUAL_ERROR_LOGGING_METADATA_KEY } from "./CustomErrorHandling";
+import "reflect-metadata"; // Import for metadata API
 
 interface ControllerOptions {
   logging?: boolean;
-  // Add more options in the future
+  benchmarking?: boolean;
 }
 
 /**
@@ -17,15 +16,24 @@ interface ControllerOptions {
  * This decorator wraps all methods in a controller class with error handling and optional logging.
  * It automatically catches errors and sends appropriate error responses based on error type.
  *
+ * Methods decorated with @ManualErrorLogging() will skip automatic error logging,
+ * allowing for manual error handling and logging.
+ *
  * @param options - Configuration options for the controller
  * @param options.logging - Enable request/response logging if true
+ * @param options.benchmarking - Enable performance benchmarking if true
  *
  * @example
  * ```ts
  * @Controller({ logging: true })
  * export class UserController {
  *   public async getUsers(req: Request, res: Response, next: NextFunction) {
- *     // Method implementation
+ *     // Method implementation with automatic error logging
+ *   }
+ *
+ *   @ManualErrorLogging()
+ *   public async sensitiveMethod(req: Request, res: Response, next: NextFunction) {
+ *     // Method with custom error handling
  *   }
  * }
  * ```
@@ -43,61 +51,25 @@ export function Controller(options?: ControllerOptions) {
 
         // Wrap each method with error handling and logging
         for (const method of methods) {
-          const originalMethod = this[method];
+          // Check if this method has the ManualErrorLogging decorator
+          const hasManualErrorLogging = Reflect.getMetadata(
+            MANUAL_ERROR_LOGGING_METADATA_KEY,
+            target.prototype,
+            method,
+          );
 
-          this[method] = async function (...args: any[]) {
-            const [req, res, next] = args;
-
-            try {
-              // Log the request (if logging is enabled)
-              if (options?.logging) {
-                console.log(`${new Date().toISOString()} | ${req.method} ${req.path} | Started`);
-              }
-
-              // Call the original controller method
-              const result = await originalMethod.apply(this, args);
-
-              // Log the successful response
-              if (options?.logging) {
-                console.log(`${new Date().toISOString()} | ${req.method} ${req.path} | Completed`);
-              }
-
-              return result;
-            } catch (error) {
-              // Log the error
-              if (options?.logging) {
-                console.error(
-                  `${new Date().toISOString()} | ${req.method} ${req.path} | Error:`,
-                  error,
-                );
-              }
-
-              // Handle different error types
-              if (error instanceof UniqueConstraintError) {
-                res
-                  .status(error.statusCode)
-                  .json(new ErrorResponseBuilder(StatusCodes.CONFLICT, error.message).build());
-              } else if (error instanceof ResourceDoesNotExistError) {
-                res
-                  .status(StatusCodes.NOT_FOUND)
-                  .json(new ErrorResponseBuilder(StatusCodes.NOT_FOUND, error.message).build());
-              } else if (error instanceof AuthenticationError) {
-                // For security reasons, use a generic error message for authentication failures
-                // instead of exposing the actual error message
-                res
-                  .status(StatusCodes.UNAUTHORIZED)
-                  .json(
-                    new ErrorResponseBuilder(
-                      StatusCodes.UNAUTHORIZED,
-                      "Wrong email or password.",
-                    ).build(),
-                  );
-              } else {
-                // Forward to Express error handler for unknown errors
-                next(error);
-              }
-            }
+          // Create wrapper with options
+          const wrapperOptions = {
+            errorHandler: handleControllerError,
+            logging: hasManualErrorLogging ? false : options?.logging,
+            benchmarking: options?.benchmarking,
           };
+
+          // Create a method-specific wrapper with proper options
+          const methodWrapper = createControllerMethodWrapper(wrapperOptions);
+
+          // Apply the wrapper
+          this[method] = methodWrapper(target.prototype[method], this);
         }
       }
     };

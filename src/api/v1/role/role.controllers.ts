@@ -10,6 +10,7 @@ import RoleService from "./role.service";
 
 export const getRoles = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
+    const roleService = container.resolve(RoleService);
     const roles = await roleService.getRoles();
     const response = new ResponseBuilder()
       .setStatusCode(StatusCodes.OK)
