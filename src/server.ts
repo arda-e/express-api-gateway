@@ -1,20 +1,20 @@
-import { Server } from 'http';
-import { container } from 'tsyringe';
-import LoggerFactory from '@utils/Logger';
-import Config from '@config/config';
-import { initializeServerDependencies } from '@config/dependencies';
-import SessionConfig from '@config/sessionConfig';
+import { Server } from "http";
+import { container } from "tsyringe";
+import LoggerFactory from "@utils/Logger";
+import Config from "@config/config";
+import { initializeAppDependencies, initializeServerDependencies } from "@config/dependencies";
+import SessionConfig from "@config/sessionConfig";
 
-import DatabaseManager from './db/db.manager';
+import DatabaseManager from "./db/db.manager";
 
 const logger = LoggerFactory.getLogger();
 const SERVER_PORT = Config.server.port;
 const SHUTDOWN_TIMEOUT = Config.server.shutdownTimeout;
 
 enum SHUTDOWN_EVENTS {
-  SIGINT = 'SIGINT',
-  SIGTERM = 'SIGTERM',
-  UNCAUGHT_EXCEPTION = 'uncaughtException',
+  SIGINT = "SIGINT",
+  SIGTERM = "SIGTERM",
+  UNCAUGHT_EXCEPTION = "uncaughtException",
 }
 
 /**
@@ -32,15 +32,16 @@ const startServer = async (
   databaseFactory: DatabaseManager = container.resolve(DatabaseManager),
 ): Promise<Server> => {
   try {
+    // 1. Redis + DB initialize
     await initializeServerDependencies(sessionConfig, databaseFactory);
-    const { default: app } = await import('./app');
-
+    // 2. App-level DI bindings (e.g. services, repositories)
+    initializeAppDependencies();
+    const { default: app } = await import("./app");
     const server: Server = app.listen(SERVER_PORT, () => {
       logger.info(`API Gateway running on port ${SERVER_PORT}`);
     });
 
     setupEventListeners(server);
-
     return server;
   } catch (error: unknown) {
     if (error instanceof Error) {
@@ -84,21 +85,21 @@ function handleUncaughtException(error: Error): void {
  * @returns A Promise that resolves when the shutdown is complete.
  */
 export async function gracefulShutdown(server: Server): Promise<void> {
-  logger.info('Graceful shutdown initiated');
+  logger.info("Graceful shutdown initiated");
   try {
     // Wait for either the server to close or the timeout to occur.
     await Promise.race([
       handleServerClose(server),
       new Promise<void>((_, reject) =>
-        setTimeout(() => reject(new Error('Shutdown timeout')), SHUTDOWN_TIMEOUT),
+        setTimeout(() => reject(new Error("Shutdown timeout")), SHUTDOWN_TIMEOUT),
       ),
     ]);
-    logger.info('Server closed successfully');
+    logger.info("Server closed successfully");
   } catch (error: unknown) {
     if (error instanceof Error) {
       logger.error(`Error during graceful shutdown: ${error.message}`);
     } else {
-      logger.error('Error during graceful shutdown: Unknown error');
+      logger.error("Error during graceful shutdown: Unknown error");
     }
   } finally {
     process.exit(0);
@@ -114,22 +115,22 @@ export async function handleServerClose(
     await new Promise<void>((resolve, reject) => {
       server.close((error) => {
         if (error) {
-          logger.error('Error closing the server:', error);
+          logger.error("Error closing the server:", error);
           return reject(error);
         }
-        logger.info('Server closed successfully.');
+        logger.info("Server closed successfully.");
         resolve();
       });
     });
 
     await sessionConfig.destroy();
-    logger.info('Session configuration destroyed.');
+    logger.info("Session configuration destroyed.");
 
     // Close the database connection
     await databaseManager.close();
-    logger.info('Database connection closed.');
+    logger.info("Database connection closed.");
   } catch (error) {
-    logger.error('Error during graceful shutdown:', error);
+    logger.error("Error during graceful shutdown:", error);
   }
 }
 

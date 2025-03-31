@@ -1,11 +1,51 @@
 //** EXTERNAL LIBRARIES
-import bcrypt from 'bcryptjs';
-import { IsArray, IsEmail, IsString, Length, ValidateNested } from 'class-validator';
-import { Type } from 'class-transformer';
+import bcrypt from "bcryptjs";
+import { IsArray, IsEmail, IsString, Length, ValidateNested } from "class-validator";
+import { Type } from "class-transformer";
 //** LOCAL MODULES
-import BaseModel from '@utils/Model';
-import Role from '@api/v1/role/models/role.model';
+import BaseModel from "@utils/Model";
+import Role from "@api/v1/role/models/role.model";
 
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     model.User:
+ *       type: object
+ *       required:
+ *         - username
+ *         - email
+ *         - password
+ *       properties:
+ *         id:
+ *           type: string
+ *           format: uuid
+ *           description: The auto-generated UUID of the user
+ *         username:
+ *           type: string
+ *           minLength: 3
+ *           description: The username of the user
+ *         email:
+ *           type: string
+ *           format: email
+ *           description: The email address of the user
+ *         password:
+ *           type: string
+ *           format: password
+ *           minLength: 6
+ *           description: The hashed password of the user
+ *         roles:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/model.Role'
+ *           description: The roles assigned to the user
+ *       example:
+ *         id: "550e8400-e29b-41d4-a716-446655440000"
+ *         username: "johndoe"
+ *         email: "john.doe@example.com"
+ *         password: "$2a$10$abcdefghijklmnopqrstuvwxyz123456789"
+ *         roles: []
+ */
 export class User extends BaseModel {
   @IsString()
   @Length(3)

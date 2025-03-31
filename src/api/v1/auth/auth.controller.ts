@@ -1,26 +1,64 @@
 //** EXTERNAL LIBRARIES
-import bcrypt from 'bcryptjs';
-import { NextFunction, Request, Response } from 'express';
-import 'express-session';
-import { StatusCodes } from 'http-status-codes';
-import { container } from 'tsyringe';
+import bcrypt from "bcryptjs";
+import { NextFunction, Request, Response } from "express";
+import "express-session";
+import { StatusCodes } from "http-status-codes";
+import { container } from "tsyringe";
 //** INTERNAL UTILS
 import {
   UniqueConstraintError,
   ResourceDoesNotExistError,
   AuthenticationError,
   AppError,
-} from '@utils/errors/';
-import { ResponseBuilder, ErrorResponseBuilder } from '@utils/ResponseBuilder';
+  InternalServerError,
+} from "@utils/errors/";
+import { ResponseBuilder, ErrorResponseBuilder } from "@utils/ResponseBuilder";
 
 //** LOCAL MODULES
-import * as DTO from './auth.dtos';
-import AuthService from './auth.service';
+import * as DTO from "./auth.dtos";
+import AuthService from "./auth.service";
 
-const authService = container.resolve(AuthService);
-
+/**
+ * @openapi
+ * /api/v1/auth/register:
+ *   post:
+ *     tags:
+ *       - Auth
+ *     summary: Register a new user
+ *     requestBody:
+ *       description: User registration data
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/dto.RegisterUserRequest'
+ *     responses:
+ *       201:
+ *         description: User registered successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/SuccessResponse'
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       $ref: '#/components/schemas/model.User'
+ *                     message:
+ *                       example: User registered successfully
+ *                     statusCode:
+ *                       example: 201
+ *       409:
+ *         description: Email is already registered.
+ *         content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/error.UniqueConstraintError'
+ */
 export const register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
+    const authService = container.resolve(AuthService);
+
     const { username, email, password } = req.body as DTO.RegisterUserRequestDTO;
 
     const user = await authService.register(username, email, password);
@@ -29,9 +67,9 @@ export const register = async (req: Request, res: Response, next: NextFunction):
       .status(StatusCodes.CREATED)
       .json(
         new ResponseBuilder()
-          .setStatus('success')
+          .setStatus("success")
           .setStatusCode(StatusCodes.CREATED)
-          .setMessage('User registered successfully')
+          .setMessage("User registered successfully")
           .setData(user)
           .build(),
       );
@@ -40,7 +78,7 @@ export const register = async (req: Request, res: Response, next: NextFunction):
       res
         .status(error.statusCode)
         .json(
-          new ErrorResponseBuilder(StatusCodes.CONFLICT, 'Email is already registered.').build(),
+          new ErrorResponseBuilder(StatusCodes.CONFLICT, "Email is already registered.").build(),
         );
     } else {
       return next(error);
@@ -48,8 +86,47 @@ export const register = async (req: Request, res: Response, next: NextFunction):
   }
 };
 
+/**
+ * @openapi
+ * /api/v1/auth/login:
+ *   post:
+ *     tags:
+ *       - Auth
+ *     summary: Log in a user
+ *     requestBody:
+ *       description: Login credentials
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/dto.LoginUserRequest'
+ *     responses:
+ *       200:
+ *         description: User logged in successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *              allOf:
+ *                 - $ref: '#/components/schemas/common.SuccessResponse'
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       $ref: '#/components/schemas/model.User'
+ *                     message:
+ *                       example: User logged in successfully
+ *                     statusCode:
+ *                       example: 200
+ *       401:
+ *         description: Invalid credentials
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/error.AuthenticationError'
+ */
 export const login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
+    const authService = container.resolve(AuthService);
+
     const { email, password } = req.body as DTO.LoginUserRequestDTO;
     const user = await authService.login(email, password);
     req.session.userId = user.id;
@@ -57,8 +134,8 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
       .status(200)
       .json(
         new ResponseBuilder()
-          .setStatus('success')
-          .setMessage('User logged in successfully')
+          .setStatus("success")
+          .setMessage("User logged in successfully")
           .setStatusCode(200)
           .setData(user)
           .build(),
@@ -68,41 +145,109 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
     if (error instanceof AuthenticationError) {
       res
         .status(error.statusCode)
-        .json(new ErrorResponseBuilder(error.statusCode, 'Wrong email or password.').build());
+        .json(new ErrorResponseBuilder(error.statusCode, "Wrong email or password.").build());
     } else {
       next(error);
     }
   }
 };
 
+/**
+ * @openapi
+ * /api/v1/auth/logout:
+ *   post:
+ *     tags:
+ *       - Auth
+ *     summary: Logout a user
+ *     description: Destroys the user's session and clears the session cookie
+ *     security:
+ *       - sessionAuth: []
+ *     responses:
+ *       200:
+ *         description: User logged out successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/common.SuccessResponse'
+ *                 - type: object
+ *                   properties:
+ *                     message:
+ *                       example: User logged out successfully.
+ *                     statusCode:
+ *                       example: 200
+ *       500:
+ *         description: Logout failed
+ *         content:
+ *           application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/error.InternalServerError'
+ */
 export const logout = (req: Request, res: Response, next: NextFunction): void => {
   req.session.destroy((err) => {
     if (err) {
-      return next(new AppError(500, 'Logout failed'));
+      return next(new InternalServerError("Logout failed."));
     }
-    res.clearCookie('connect.sid');
+    res.clearCookie("connect.sid");
     res
       .status(StatusCodes.OK)
       .json(
         new ResponseBuilder()
-          .setStatus('success')
+          .setStatus("success")
           .setStatusCode(StatusCodes.OK)
-          .setMessage('User logged out successfully.')
+          .setMessage("User logged out successfully.")
           .build(),
       );
   });
 };
 
+/**
+ * @openapi
+ * /api/v1/auth/me:
+ *   get:
+ *     tags:
+ *       - Auth
+ *     summary: Retrieve current user details
+ *     description: Retrieves the details of the currently authenticated user using the session ID.
+ *     security:
+ *       - sessionAuth: []
+ *     responses:
+ *       200:
+ *         description: User retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/common.SuccessResponse'
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       $ref: '#/components/schemas/model.User'
+ *                     message:
+ *                       type: string
+ *                       example: User retrieved successfully
+ *                     statusCode:
+ *                       type: integer
+ *                       example: 200
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/error.ResourceDoesNotExistError'
+ */
 export const getMe = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
+    const authService = container.resolve(AuthService);
+
     const user = await authService.getMe(req.session.userId as string);
     res
       .status(StatusCodes.OK)
       .json(
         new ResponseBuilder()
-          .setStatus('success')
+          .setStatus("success")
           .setStatusCode(StatusCodes.OK)
-          .setMessage('User retrieved successfully')
+          .setMessage("User retrieved successfully")
           .setData(user)
           .build(),
       );
@@ -110,13 +255,7 @@ export const getMe = async (req: Request, res: Response, next: NextFunction): Pr
     if (error instanceof ResourceDoesNotExistError) {
       res
         .status(StatusCodes.NOT_FOUND)
-        .json(
-          new ResponseBuilder()
-            .setStatus('error')
-            .setStatusCode(StatusCodes.NOT_FOUND)
-            .setMessage(error.message)
-            .build(),
-        );
+        .json(new ErrorResponseBuilder(StatusCodes.NOT_FOUND, error.message).build());
     } else {
       next(error);
     }
@@ -130,6 +269,8 @@ export const updateUser = async (
   next: NextFunction,
 ): Promise<void> => {
   try {
+    const authService = container.resolve(AuthService);
+
     const userId = req.session.userId;
     const updateData = req.body as DTO.UpdateUserRequestDTO;
     const updatedUser = await authService.updateUser(userId!, updateData);
@@ -138,16 +279,16 @@ export const updateUser = async (
       .status(StatusCodes.OK)
       .json(
         new ResponseBuilder()
-          .setStatus('success')
+          .setStatus("success")
           .setStatusCode(StatusCodes.OK)
-          .setMessage('User updated successfully')
+          .setMessage("User updated successfully")
           .setData(updatedUser)
           .build(),
       );
   } catch (error) {
     if (error instanceof ResourceDoesNotExistError) {
       res.status(error.statusCode).json({
-        status: 'error',
+        status: "error",
         statusCode: error.statusCode,
         message: error.message,
       });
@@ -165,17 +306,19 @@ export const deleteUser = async (
   next: NextFunction,
 ): Promise<void> => {
   try {
+    const authService = container.resolve(AuthService);
+
     const userId = req.session.userId;
     await authService.deleteUser(userId!);
     req.session.destroy((err) => {
       if (err) {
-        return next(new AppError(500, 'Error during session destruction after user deletion'));
+        return next(new AppError(500, "Error during session destruction after user deletion"));
       }
-      res.clearCookie('connect.sid');
+      res.clearCookie("connect.sid");
       const response = {
-        status: 'success',
+        status: "success",
         statusCode: 200,
-        message: 'User deleted successfully',
+        message: "User deleted successfully",
       };
       res.status(200).json(response);
     });
@@ -185,7 +328,7 @@ export const deleteUser = async (
         .status(StatusCodes.NOT_FOUND)
         .json(
           new ResponseBuilder()
-            .setStatus('error')
+            .setStatus("error")
             .setStatusCode(StatusCodes.NOT_FOUND)
             .setMessage(error.message)
             .build(),
@@ -202,23 +345,25 @@ export const changePassword = async (
   next: NextFunction,
 ): Promise<void> => {
   try {
+    const authService = container.resolve(AuthService);
+
     const { password, newPassword } = req.body as DTO.ChangePasswordRequestDTO;
 
     const userId = req.session?.userId || req.user?.id;
-    if (!userId) throw new AuthenticationError('Authentication required');
+    if (!userId) throw new AuthenticationError("Authentication required");
 
     const user = await authService.getMe(userId);
     const isPasswordValid = await authService.validatePassword(password, user.password);
 
-    if (!isPasswordValid) throw new AuthenticationError('Invalid password');
+    if (!isPasswordValid) throw new AuthenticationError("Invalid password");
 
     const cryptPassword = await bcrypt.hash(newPassword, 10);
     await authService.updateUser(userId, { password: cryptPassword });
 
     const response = new ResponseBuilder()
       .setStatusCode(StatusCodes.CREATED)
-      .setStatus('success')
-      .setMessage('Password changed successfully')
+      .setStatus("success")
+      .setMessage("Password changed successfully")
       .build();
 
     res.status(response.statusCode).json(response);

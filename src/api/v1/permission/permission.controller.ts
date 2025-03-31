@@ -1,20 +1,20 @@
 //** EXTERNAL LIBRARIES
-import { RequestHandler } from 'express';
-import { StatusCodes } from 'http-status-codes';
-import { container } from 'tsyringe';
+import { RequestHandler } from "express";
+import { StatusCodes } from "http-status-codes";
+import { container } from "tsyringe";
 //** INTERNAL UTILS
-import { ResourceDoesNotExistError, ResourceAlreadyExistsError } from '@utils/errors';
-import { ErrorResponseBuilder, ResponseBuilder } from '@utils/ResponseBuilder';
+import { ResourceDoesNotExistError, ResourceAlreadyExistsError } from "@utils/errors";
+import { ErrorResponseBuilder, ResponseBuilder } from "@utils/ResponseBuilder";
 //** INTERNAL MODULES
-import { GetPermissionsDTO } from '@api/v1/permission/permission.dto';
+import { GetPermissionsDTO } from "@api/v1/permission/permission.dto";
 
-import PermissionService from './permission.service';
-import Permission from './permission.model';
-
-const permissionService = container.resolve(PermissionService);
+import PermissionService from "./permission.service";
+import Permission from "./permission.model";
 
 export const getPermissions: RequestHandler = async (_req, res, next) => {
   try {
+    const permissionService = container.resolve(PermissionService);
+
     const { page, limit } = req.query as unknown as GetPermissionsDTO;
     const pageNumber = page ?? 1;
     const limitNumber = limit ?? 10;
@@ -23,9 +23,9 @@ export const getPermissions: RequestHandler = async (_req, res, next) => {
 
     res.status(StatusCodes.OK).json(
       new ResponseBuilder()
-        .setStatus('success')
+        .setStatus("success")
         .setStatusCode(StatusCodes.OK)
-        .setMessage('Permissions retrieved successfully')
+        .setMessage("Permissions retrieved successfully")
         .setData({
           permissions,
           pagination: {
@@ -49,14 +49,15 @@ export const getPermissions: RequestHandler = async (_req, res, next) => {
 
 export const getPermission: RequestHandler = async (req, res, next) => {
   try {
+    const permissionService = container.resolve(PermissionService);
     const permission = await permissionService.getPermission(req.params.id);
     res
       .status(StatusCodes.OK)
       .json(
         new ResponseBuilder()
-          .setStatus('success')
+          .setStatus("success")
           .setStatusCode(StatusCodes.OK)
-          .setMessage('Permission retrieved successfully')
+          .setMessage("Permission retrieved successfully")
           .setData(permission)
           .build(),
       );
@@ -73,6 +74,7 @@ export const getPermission: RequestHandler = async (req, res, next) => {
 
 export const createPermission: RequestHandler = async (req, res, next) => {
   try {
+    const permissionService = container.resolve(PermissionService);
     const newPermission = new Permission(undefined, req.body.name, req.body.description);
     const createdPermission = await permissionService.createPermission(newPermission);
 
@@ -80,9 +82,9 @@ export const createPermission: RequestHandler = async (req, res, next) => {
       .status(StatusCodes.CREATED)
       .json(
         new ResponseBuilder()
-          .setStatus('success')
+          .setStatus("success")
           .setStatusCode(StatusCodes.CREATED)
-          .setMessage('Permission created successfully')
+          .setMessage("Permission created successfully")
           .setData(createdPermission)
           .build(),
       );
@@ -106,9 +108,9 @@ export const updatePermission: RequestHandler = async (req, res, next) => {
       .status(StatusCodes.OK)
       .json(
         new ResponseBuilder()
-          .setStatus('success')
+          .setStatus("success")
           .setStatusCode(StatusCodes.OK)
-          .setMessage('Permission updated successfully')
+          .setMessage("Permission updated successfully")
           .setData(result)
           .build(),
       );
