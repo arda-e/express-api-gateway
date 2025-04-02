@@ -1,12 +1,15 @@
 export class AppError extends Error {
-  constructor(
-    public statusCode: number,
-    public message: string,
-  ) {
+  public readonly statusCode: number;
+  public readonly code: string;
+  public readonly details?: any;
+
+  constructor(message: string, statusCode: number, code: string, details?: any) {
     super(message);
-    this.name = this.constructor.name;
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, this.constructor);
-    }
+    this.statusCode = statusCode;
+    this.code = code;
+    this.details = details;
+
+    // Set the prototype explicitly.
+    Object.setPrototypeOf(this, AppError.prototype);
   }
 }

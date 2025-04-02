@@ -1,20 +1,17 @@
-//** EXTERNAL LIBRARIES
-import bcrypt from "bcryptjs";
+// EXTERNAL LIBRARIES
 import { NextFunction, Request, Response } from "express";
 import "express-session";
-import { StatusCodes } from "http-status-codes";
 import { container, injectable, delay, inject } from "tsyringe";
 // INTERNAL UTILS
-import { AuthenticationError, AppError, InternalServerError } from "@utils/errors/";
-import { ResponseBuilder } from "@utils/ResponseBuilder";
-import { Controller } from "@utils/decorators/Controller";
-import { ManualErrorLogging } from "@utils/decorators/CustomErrorHandling";
+import { AuthenticationError, InternalServerError } from "@utils/errors/";
+import { ApiResponse } from "@utils/Response";
+import { Route, Benchmark, Logger, InvalidateCache, Controller, Cache } from "@utils/decorators";
 
-// LOCAL MODULES
 import * as DTO from "./auth.dtos";
+import { User } from "./auth.model";
 import AuthService from "./auth.service";
 
-@Controller({ logging: true })
+@Controller({ logging: true, benchmarking: true })
 @injectable()
 export class AuthController {
   constructor(
@@ -59,22 +56,19 @@ export class AuthController {
    *              schema:
    *                $ref: '#/components/schemas/error.UniqueConstraintError'
    */
-  public register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  @Route()
+  @Benchmark()
+  @Logger()
+  public async register(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<ApiResponse<User>> {
     const { username, email, password } = req.body as DTO.RegisterUserRequestDTO;
 
     const user = await this.authService.register(username, email, password);
-
-    res
-      .status(StatusCodes.CREATED)
-      .json(
-        new ResponseBuilder()
-          .setStatus("success")
-          .setStatusCode(StatusCodes.CREATED)
-          .setMessage("User registered successfully")
-          .setData(user)
-          .build(),
-      );
-  };
+    return ApiResponse.created(user, "User registered successfully");
+  }
 
   /**
    * Example of a method with manual error logging
@@ -116,20 +110,15 @@ export class AuthController {
    *             schema:
    *               $ref: '#/components/schemas/error.AuthenticationError'
    */
-  public async login(req: Request, res: Response, next: NextFunction): Promise<void> {
+  @Route()
+  @Benchmark()
+  @Logger()
+  public async login(req: Request, res: Response, next: NextFunction): Promise<ApiResponse<User>> {
     const { email, password } = req.body as DTO.LoginUserRequestDTO;
     const user = await this.authService.login(email, password);
     req.session.userId = user.id;
-    res
-      .status(200)
-      .json(
-        new ResponseBuilder()
-          .setStatus("success")
-          .setMessage("User logged in successfully")
-          .setStatusCode(200)
-          .setData(user)
-          .build(),
-      );
+
+    return ApiResponse.success(user, "User logged in successfully");
   }
 
   /**
@@ -163,22 +152,22 @@ export class AuthController {
    *              schema:
    *                $ref: '#/components/schemas/error.InternalServerError'
    */
-  public logout = (req: Request, res: Response, next: NextFunction): void => {
-    req.session.destroy((err) => {
-      if (err) return next(new InternalServerError("Logout failed."));
+  @Route()
+  @Logger()
+  @InvalidateCache("user:*")
+  public async logout(req: Request, res: Response, next: NextFunction): Promise<ApiResponse<null>> {
+    return new Promise((resolve, reject) => {
+      req.session.destroy((err) => {
+        if (err) {
+          reject(new InternalServerError("Logout failed."));
+          return;
+        }
 
-      res.clearCookie("connect.sid");
-      res
-        .status(StatusCodes.OK)
-        .json(
-          new ResponseBuilder()
-            .setStatus("success")
-            .setStatusCode(StatusCodes.OK)
-            .setMessage("User logged out successfully.")
-            .build(),
-        );
+        res.clearCookie("connect.sid");
+        resolve(ApiResponse.success(null, "User logged out successfully"));
+      });
     });
-  };
+  }
 
   /**
    * @openapi
@@ -215,84 +204,149 @@ export class AuthController {
    *             schema:
    *               $ref: '#/components/schemas/error.ResourceDoesNotExistError'
    */
-  public getMe = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  @Route()
+  @Benchmark()
+  @Logger()
+  @Cache({ ttl: 600_000 })
+  public async getMe(req: Request, res: Response, next: NextFunction): Promise<ApiResponse<User>> {
     const user = await this.authService.getMe(req.session.userId as string);
-    res
-      .status(StatusCodes.OK)
-      .json(
-        new ResponseBuilder()
-          .setStatus("success")
-          .setStatusCode(StatusCodes.OK)
-          .setMessage("User retrieved successfully")
-          .setData(user)
-          .build(),
-      );
-  };
+    return ApiResponse.success(user, "User retrieved successfully");
+  }
 
-  public updateUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const userId = req.session.userId;
-    const updateData = req.body as DTO.UpdateUserRequestDTO;
-    const updatedUser = await this.authService.updateUser(userId!, updateData);
-
-    res
-      .status(StatusCodes.OK)
-      .json(
-        new ResponseBuilder()
-          .setStatus("success")
-          .setStatusCode(StatusCodes.OK)
-          .setMessage("User updated successfully")
-          .setData(updatedUser)
-          .build(),
-      );
-  };
-
-  public deleteUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const userId = req.session.userId;
-    await this.authService.deleteUser(userId!);
-
-    req.session.destroy((err) => {
-      if (err)
-        return next(new AppError(500, "Error during session destruction after user deletion"));
-
-      res.clearCookie("connect.sid");
-      res
-        .status(StatusCodes.OK)
-        .json(
-          new ResponseBuilder()
-            .setStatus("success")
-            .setStatusCode(StatusCodes.OK)
-            .setMessage("User deleted successfully")
-            .build(),
-        );
-    });
-  };
-
-  public changePassword = async (
+  /**
+   * @openapi
+   * /api/v1/auth/me:
+   *   put:
+   *     tags:
+   *       - Auth
+   *     summary: Update current user details
+   *     description: Updates the details of the currently authenticated user.
+   *     security:
+   *       - sessionAuth: []
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/dto.UpdateUserRequest'
+   *     responses:
+   *       200:
+   *         description: User updated successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               allOf:
+   *                 - $ref: '#/components/schemas/common.SuccessResponse'
+   *                 - type: object
+   *                   properties:
+   *                     data:
+   *                       $ref: '#/components/schemas/model.User'
+   *                     message:
+   *                       example: User updated successfully
+   *                     statusCode:
+   *                       example: 200
+   */
+  @Route()
+  @Benchmark()
+  @Logger()
+  @InvalidateCache("user:*")
+  public async updateUser(
     req: Request,
     res: Response,
     next: NextFunction,
-  ): Promise<void> => {
+  ): Promise<ApiResponse<User>> {
+    const userId = req.session.userId;
+
+    if (!userId) {
+      throw new AuthenticationError("User not authenticated");
+    }
+
+    const updateData = req.body as DTO.UpdateUserRequestDTO;
+    const updatedUser = await this.authService.updateUser(userId, updateData);
+
+    return ApiResponse.success(updatedUser, "User updated successfully");
+  }
+
+  /**
+   * @openapi
+   * /api/v1/auth/me:
+   *   delete:
+   *     tags:
+   *       - Auth
+   *     summary: Delete current user
+   *     description: Deletes the currently authenticated user's account.
+   *     security:
+   *       - sessionAuth: []
+   *     responses:
+   *       200:
+   *         description: User deleted successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               allOf:
+   *                 - $ref: '#/components/schemas/common.SuccessResponse'
+   *                 - type: object
+   *                   properties:
+   *                     message:
+   *                       example: User deleted successfully
+   *                     statusCode:
+   *                       example: 200
+   */
+  @Route()
+  @Benchmark()
+  @Logger()
+  @InvalidateCache("user:*")
+  public async deleteUser(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<ApiResponse<null>> {
+    const userId = req.session.userId;
+
+    if (!userId) {
+      throw new AuthenticationError("User not authenticated");
+    }
+
+    await this.authService.deleteUser(userId);
+
+    return new Promise((resolve, reject) => {
+      req.session.destroy((err) => {
+        if (err) {
+          reject(new InternalServerError("Error during session destruction after user deletion"));
+          return;
+        }
+
+        res.clearCookie("connect.sid");
+        resolve(ApiResponse.success(null, "User deleted successfully"));
+      });
+    });
+  }
+
+  @Route()
+  @Benchmark()
+  @Logger()
+  public async changePassword(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<ApiResponse<null>> {
     const { password, newPassword } = req.body as DTO.ChangePasswordRequestDTO;
 
     const userId = req.session?.userId || req.user?.id;
-    if (!userId) throw new AuthenticationError("Authentication required");
+    if (!userId) {
+      throw new AuthenticationError("Authentication required");
+    }
 
     const user = await this.authService.getMe(userId);
     const isPasswordValid = await this.authService.validatePassword(password, user.password);
 
-    if (!isPasswordValid) throw new AuthenticationError("Invalid password");
+    if (!isPasswordValid) {
+      throw new AuthenticationError("Invalid password");
+    }
 
-    const cryptPassword = await bcrypt.hash(newPassword, 10);
-    await this.authService.updateUser(userId, { password: cryptPassword });
-
-    const response = new ResponseBuilder()
-      .setStatusCode(StatusCodes.CREATED)
-      .setStatus("success")
-      .setMessage("Password changed successfully")
-      .build();
-
-    res.status(response.statusCode).json(response);
-  };
+    await this.authService.changePassword(userId, newPassword);
+    return ApiResponse.success(null, "Password changed successfully");
+  }
 }
 
 export default container.resolve(AuthController);

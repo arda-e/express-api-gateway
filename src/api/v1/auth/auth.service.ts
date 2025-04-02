@@ -1,6 +1,7 @@
 //** EXTERNAL LIBRARIES
 import bcrypt from "bcryptjs";
 import { inject, injectable } from "tsyringe";
+import { Knex } from "knex";
 //** INTERNAL UTILS
 import {
   AuthenticationError,
@@ -8,7 +9,7 @@ import {
   UniqueConstraintError,
   ValidationError,
 } from "@utils/errors";
-import { Catch } from "@utils/decorators";
+import { ExceptionHandler, Transaction, RequiresTransaction } from "@utils/decorators";
 
 //** INTERNAL MODULES
 import { User } from "./auth.model";
@@ -21,10 +22,16 @@ import AuthRepository from "./auth.repository";
 export class AuthService {
   constructor(@inject(AuthRepository) private authRepository: AuthRepository) {}
 
-  @Catch("Failed to register user")
-  async register(username: string, email: string, password: string): Promise<User> {
+  @ExceptionHandler("Failed to register user")
+  @Transaction()
+  async register(
+    username: string,
+    email: string,
+    password: string,
+    trx?: Knex.Transaction,
+  ): Promise<User> {
     console.log("AuthService: Starting registration");
-    const existingUser = await this.authRepository.findByEmail(email);
+    const existingUser = await this.authRepository.findByEmail(email, trx);
 
     if (existingUser) {
       //!TODO: Convert to logger
@@ -38,13 +45,14 @@ export class AuthService {
       password,
       ["cbd0bdfe-6240-4a9d-8882-e1df7a9938ed"],
       // !TODO: Replace with the actual role ID
+      trx,
     );
     //!TODO: Convert to logger
     console.log("AuthService: Registration successful");
     return newUser;
   }
 
-  @Catch("Failed to login user")
+  @ExceptionHandler("Failed to login user")
   async login(email: string, password: string): Promise<User> {
     const user = await this.authRepository.findByEmail(email);
 
@@ -61,7 +69,7 @@ export class AuthService {
     return user;
   }
 
-  @Catch("Failed to retrieve user")
+  @ExceptionHandler((params: { userId: string }) => `Failed to retrieve user ${params.userId}`)
   async getMe(userId: string): Promise<User> {
     const user = await this.authRepository.findById(userId);
     if (!user) {
@@ -70,30 +78,48 @@ export class AuthService {
     return user;
   }
 
-  @Catch("Failed to update user")
-  async updateUser(userId: string, updateData: DTO.UpdateUserRequestDTO): Promise<User> {
-    const user = await this.authRepository.findById(userId);
+  @ExceptionHandler("Failed to update user")
+  @Transaction()
+  async updateUser(
+    userId: string,
+    updateData: DTO.UpdateUserRequestDTO,
+    trx?: Knex.Transaction,
+  ): Promise<User> {
+    const user = await this.authRepository.findById(userId, trx);
     if (!user) {
       throw new ResourceDoesNotExistError("User not found");
     }
 
     if (updateData.email && updateData.email !== user.email) {
-      const existingUser = await this.authRepository.findByEmail(updateData.email);
+      const existingUser = await this.authRepository.findByEmail(updateData.email, trx);
       if (existingUser) {
         throw new UniqueConstraintError("Email already in use");
       }
     }
 
-    return await this.authRepository.update(userId, updateData);
+    return await this.authRepository.update(userId, updateData, trx);
   }
 
-  @Catch("Failed to delete user")
-  async deleteUser(userId: string): Promise<boolean> {
-    const user = await this.authRepository.findById(userId);
+  @ExceptionHandler("Failed to delete user")
+  @Transaction()
+  async deleteUser(userId: string, trx?: Knex.Transaction): Promise<boolean> {
+    const user = await this.authRepository.findById(userId, trx);
     if (!user) {
       throw new ResourceDoesNotExistError("User not found");
     }
-    return await this.authRepository.deleteById(userId);
+    return await this.authRepository.deleteById(userId, trx);
+  }
+
+  @ExceptionHandler("Failed to change password")
+  @Transaction()
+  async changePassword(userId: string, newPassword: string, trx?: Knex.Transaction): Promise<User> {
+    const user = await this.authRepository.findById(userId, trx);
+    if (!user) {
+      throw new ResourceDoesNotExistError("User not found");
+    }
+
+    const cryptPassword = await bcrypt.hash(newPassword, 10);
+    return await this.authRepository.update(userId, { password: cryptPassword }, trx);
   }
 
   // Revert to original implementation for this security-critical method
