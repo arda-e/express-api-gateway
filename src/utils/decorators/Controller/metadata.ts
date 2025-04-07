@@ -3,6 +3,8 @@ import { BENCHMARK_METADATA_KEY } from "../Benchmark";
 import { LOGGER_METADATA_KEY } from "../Logger";
 import { CUSTOM_RESPONSE_HANDLING_KEY } from "../CustomResponse";
 
+export const CONTROLLER_METADATA_KEY = Symbol("controller");
+
 /**
  * Retrieves the controller methods that should be wrapped
  */

@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from 'express';
-import Logger from '@utils/Logger';
+import { Request, Response, NextFunction } from "express";
+import Logger from "@utils/Logger";
 
 const logger = Logger.getLogger();
 
@@ -10,8 +10,12 @@ const logger = Logger.getLogger();
  * @param next - The Express next middleware function.
  */
 const loggerMiddleware = (req: Request, _res: Response, next: NextFunction) => {
-  logger.info(`${req.method} ${req.url}`);
-  next();
+  try {
+    logger.info(`${req.method} ${req.url}`);
+    next();
+  } catch (error) {
+    next(error);
+  }
 };
 
 export default loggerMiddleware;

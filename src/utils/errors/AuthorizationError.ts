@@ -20,7 +20,7 @@ import { AppError } from "@utils/errors/AppError";
  *           description: Error thrown when a user attempts to access a resource or perform an action they are not permitted to.
  */
 export class AuthorizationError extends AppError {
-  constructor(message: string = "Not authorized") {
-    super(403, message);
+  constructor(message: string = "Access denied") {
+    super(message, 403, "AUTHORIZATION_ERROR");
   }
 }

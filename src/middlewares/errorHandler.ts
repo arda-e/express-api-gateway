@@ -1,10 +1,10 @@
 //** EXTERNAL LIBRARIES
-import { Request, Response } from 'express';
-import { StatusCodes } from 'http-status-codes';
+import { Request, Response } from "express";
+import { StatusCodes } from "http-status-codes";
 //** INTERNAL UTILS
-import Logger from '@utils/Logger';
-import { AppError } from '@utils/errors/AppError';
-import { ErrorResponseBuilder } from '@utils/ResponseBuilder';
+import Logger from "@utils/Logger";
+import { AppError } from "@utils/errors/AppError";
+import { ResponseBuilder } from "@utils/ResponseBuilder";
 
 const logger = Logger.getLogger();
 
@@ -39,21 +39,31 @@ const errorHandler = (err: Error, req: Request, res: Response) => {
   });
   //** HTTP RESPONSE
   if (!isUserAuthenticated(req)) {
-    const response = new ErrorResponseBuilder(StatusCodes.UNAUTHORIZED, 'Unauthorized');
-    return res.status(response.getStatusCode).json(response);
+    const response = new ResponseBuilder()
+      .setStatus("error")
+      .setStatusCode(StatusCodes.UNAUTHORIZED)
+      .setMessage("Unauthorized")
+      .build();
+    return res.status(response.statusCode).json(response);
   }
 
   if (err instanceof AppError) {
-    const response = new ErrorResponseBuilder(err.statusCode, err.message);
-    return res.status(response.getStatusCode).json(response);
+    const response = new ResponseBuilder()
+      .setStatus("error")
+      .setStatusCode(err.statusCode)
+      .setMessage(err.message)
+      .setErrorCode(err.code)
+      .build();
+    return res.status(response.statusCode).json(response);
   }
 
-  const response = new ErrorResponseBuilder(
-    StatusCodes.INTERNAL_SERVER_ERROR,
-    'Internal Server Error',
-  );
+  const response = new ResponseBuilder()
+    .setStatus("error")
+    .setStatusCode(StatusCodes.INTERNAL_SERVER_ERROR)
+    .setMessage("Internal Server Error")
+    .build();
 
-  return res.status(response.getStatusCode).json(response);
+  return res.status(response.statusCode).json(response);
 };
 
 export default errorHandler;

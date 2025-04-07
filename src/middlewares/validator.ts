@@ -1,10 +1,10 @@
 //** EXTERNAL LIBRARIES
-import { Request, Response, NextFunction } from 'express';
-import { validateOrReject, ValidationError as ClassValidatorError } from 'class-validator';
-import { plainToInstance } from 'class-transformer';
-import { StatusCodes } from 'http-status-codes';
+import { Request, Response, NextFunction } from "express";
+import { validateOrReject, ValidationError as ClassValidatorError } from "class-validator";
+import { plainToInstance } from "class-transformer";
+import { StatusCodes } from "http-status-codes";
 //** INTERNAL UTILS
-import { ResponseBuilder } from '@utils/ResponseBuilder';
+import { ResponseBuilder } from "@utils/ResponseBuilder";
 
 /**
  * Middleware function that validates the request body using a provided DTO class.
@@ -14,7 +14,10 @@ import { ResponseBuilder } from '@utils/ResponseBuilder';
  */
 const validateRequest = (dtoClass: any) => {
   return async (req: Request, res: Response, next: NextFunction) => {
-    const dtoInstance = plainToInstance(dtoClass, req.body) as any;
+    // Use excludeExtraneousValues to remove properties not defined in the DTO
+    const dtoInstance = plainToInstance(dtoClass, req.body, {
+      excludeExtraneousValues: true,
+    }) as any;
 
     try {
       await validateOrReject(dtoInstance);
@@ -36,9 +39,9 @@ const validateRequest = (dtoClass: any) => {
       }));
 
       const errorResponse = new ResponseBuilder()
-        .setStatus('error')
+        .setStatus("error")
         .setStatusCode(StatusCodes.BAD_REQUEST)
-        .setMessage('Validation failed')
+        .setMessage("Validation failed")
         .setErrors(formattedErrors)
         .build();
 

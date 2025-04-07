@@ -45,7 +45,7 @@ export class AuthService {
       password,
       ["cbd0bdfe-6240-4a9d-8882-e1df7a9938ed"],
       // !TODO: Replace with the actual role ID
-      trx,
+      trx!,
     );
     //!TODO: Convert to logger
     console.log("AuthService: Registration successful");
@@ -97,17 +97,17 @@ export class AuthService {
       }
     }
 
-    return await this.authRepository.update(userId, updateData, trx);
+    return await this.authRepository.update(userId, updateData, trx!);
   }
 
-  @ExceptionHandler("Failed to delete user")
+  @ExceptionHandler((userId) => `Failed to delete user with id ${userId}`)
   @Transaction()
   async deleteUser(userId: string, trx?: Knex.Transaction): Promise<boolean> {
     const user = await this.authRepository.findById(userId, trx);
     if (!user) {
       throw new ResourceDoesNotExistError("User not found");
     }
-    return await this.authRepository.deleteById(userId, trx);
+    return await this.authRepository.deleteById(userId, trx!);
   }
 
   @ExceptionHandler("Failed to change password")
@@ -119,7 +119,7 @@ export class AuthService {
     }
 
     const cryptPassword = await bcrypt.hash(newPassword, 10);
-    return await this.authRepository.update(userId, { password: cryptPassword }, trx);
+    return await this.authRepository.update(userId, { password: cryptPassword }, trx!);
   }
 
   // Revert to original implementation for this security-critical method

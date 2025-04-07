@@ -47,6 +47,7 @@ export const createRole = async (
 export const getRole = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const roleId = req.params.id;
+    const roleService = container.resolve(RoleService);
     // !TODO: check service for correct error throw
     const role = await roleService.getRole(roleId);
     const response = new ResponseBuilder()

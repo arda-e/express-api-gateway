@@ -20,7 +20,7 @@ import { AppError } from "@utils/errors/AppError";
  *           description: Error thrown when a requested resource cannot be found in the database
  */
 export class ResourceDoesNotExistError extends AppError {
-  constructor(message: string = "Resource does not exist") {
-    super(404, message);
+  constructor(message: string = "Resource not found") {
+    super(message, 404, "RESOURCE_NOT_FOUND");
   }
 }

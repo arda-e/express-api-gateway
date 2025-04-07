@@ -7,7 +7,7 @@ import {
   ResourceAlreadyExistsError,
   ResourceDoesNotExistError,
 } from "@utils/errors";
-import { Catch } from "@utils/decorators";
+import { ExceptionHandler } from "@utils/decorators";
 //** INTERNAL MODULES
 import { User, AuthRepository } from "@api/v1/auth";
 import { Role, RolePermission } from "@api/v1/role/models";
@@ -32,7 +32,7 @@ class RoleService {
    * @returns An array of all roles in the system.
    * @throws {DatabaseError} If there is an error retrieving roles from the database.
    */
-  @Catch("Failed to retrieve roles")
+  @ExceptionHandler("Failed to retrieve roles")
   public async getRoles(): Promise<Role[]> {
     return await this.roleRepository.findAll();
   }
@@ -45,7 +45,7 @@ class RoleService {
    * @throws {ResourceDoesNotExistError} If the role with the given ID does not exist.
    * @throws {DatabaseError} If there is an error retrieving the role from the database.
    */
-  @Catch("Failed to retrieve role")
+  @ExceptionHandler("Failed to retrieve role")
   public async getRole(roleId: string): Promise<Role | null> {
     const existingRole = await this.roleRepository.findById(roleId);
     if (!existingRole) {
@@ -62,7 +62,7 @@ class RoleService {
    * @throws {ResourceAlreadyExistsError} If a role with the same name already exists.
    * @throws {DatabaseError} If there is an error creating the role in the database.
    */
-  @Catch("Failed to create role")
+  @ExceptionHandler("Failed to create role")
   public async createRole(role: Role): Promise<Role> {
     const existingRole = await this.roleRepository.findByField("name", role.name);
     if (existingRole) {
@@ -80,7 +80,7 @@ class RoleService {
    * @throws {ResourceDoesNotExistError} If the role with the given ID does not exist.
    * @throws {DatabaseError} If there is an error updating the role in the database.
    */
-  @Catch("Failed to update role")
+  @ExceptionHandler("Failed to update role")
   public async updateRole(roleId: string, role: Role): Promise<Role> {
     await this.ensureRoleExists(roleId);
     return await this.roleRepository.update(roleId, role);
@@ -94,7 +94,7 @@ class RoleService {
    * @throws {ResourceDoesNotExistError} If the role with the given ID does not exist.
    * @throws {DatabaseError} If there is an error deleting the role from the database.
    */
-  @Catch("Failed to delete role")
+  @ExceptionHandler("Failed to delete role")
   public async deleteRole(roleId: string): Promise<void> {
     await this.ensureRoleExists(roleId);
     await this.roleRepository.deleteById(roleId);
@@ -109,7 +109,7 @@ class RoleService {
    * @throws {ResourceDoesNotExistError} If the user or role does not exist.
    * @throws {DatabaseError} If there is an error assigning the role to the user.
    */
-  @Catch("Failed to assign role to user")
+  @ExceptionHandler("Failed to assign role to user")
   async assignRoleToUser(userId: string, roleId: string): Promise<User | null> {
     await this.ensureRoleExists(roleId);
     const user = await this.authRepository.findById(userId);
@@ -128,7 +128,7 @@ class RoleService {
    * @throws {ResourceDoesNotExistError} If the role does not exist.
    * @throws {DatabaseError} If there is an error removing the role from the user.
    */
-  @Catch("Failed to remove role from user")
+  @ExceptionHandler("Failed to remove role from user")
   async removeRoleFromUser(userId: string, roleId: string): Promise<void> {
     await this.ensureRoleExists(roleId);
     const user = await this.authRepository.findById(userId);
@@ -146,7 +146,7 @@ class RoleService {
    * @throws {ResourceDoesNotExistError} If the user does not exist.
    * @throws {DatabaseError} If there is an error retrieving the user's roles.
    */
-  @Catch("Failed to get user roles")
+  @ExceptionHandler("Failed to get user roles")
   async getUserRoles(userId: string): Promise<Role[]> {
     const user = await this.authRepository.findById(userId);
     if (!user) {
@@ -163,7 +163,7 @@ class RoleService {
    * @throws {ResourceDoesNotExistError} If the role does not exist.
    * @throws {DatabaseError} If there is an error retrieving the role's users.
    */
-  @Catch("Failed to get users by role")
+  @ExceptionHandler("Failed to get users by role")
   async getUsersByRole(roleId: string): Promise<User[]> {
     await this.ensureRoleExists(roleId);
     return this.userRoleRepository.getUsersByRole(roleId);
@@ -177,7 +177,7 @@ class RoleService {
    * @throws {ResourceDoesNotExistError} If the role with the given ID does not exist.
    * @throws {DatabaseError} If there is an error checking the role's existence.
    */
-  @Catch("Failed to check role existence")
+  @ExceptionHandler("Failed to check role existence")
   private async ensureRoleExists(roleId: string): Promise<Role> {
     const existingRole = await this.roleRepository.findById(roleId);
     if (!existingRole) {
@@ -194,7 +194,7 @@ class RoleService {
    * @throws {ResourceDoesNotExistError} If the role does not exist.
    * @throws {DatabaseError} If there is an error assigning the permission to the role.
    */
-  @Catch("Failed to assign permission to role")
+  @ExceptionHandler("Failed to assign permission to role")
   async assignPermissionToRole(roleId: string, permissionId: string): Promise<void> {
     await this.ensureRoleExists(roleId);
     await this.rolePermissionRepository.assignPermissionToRole(roleId, permissionId);
@@ -208,7 +208,7 @@ class RoleService {
    * @throws {ResourceDoesNotExistError} If the role does not exist.
    * @throws {DatabaseError} If there is an error removing the permission from the role.
    */
-  @Catch("Failed to remove permission from role")
+  @ExceptionHandler("Failed to remove permission from role")
   async removePermissionFromRole(roleId: string, permissionId: string): Promise<void> {
     await this.ensureRoleExists(roleId);
     await this.rolePermissionRepository.removePermissionFromRole(roleId, permissionId);
@@ -222,7 +222,7 @@ class RoleService {
    * @throws {ResourceDoesNotExistError} If the role does not exist.
    * @throws {DatabaseError} If there is an error retrieving the role's permissions.
    */
-  @Catch("Failed to get role permissions")
+  @ExceptionHandler("Failed to get role permissions")
   async getRolePermissions(roleId: string): Promise<RolePermission[]> {
     await this.ensureRoleExists(roleId);
     return this.rolePermissionRepository.getRolePermissions(roleId);

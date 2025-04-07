@@ -3,6 +3,7 @@ import {
   hasCustomResponseHandling,
   shouldBenchmarkMethod,
   shouldLogMethod,
+  CONTROLLER_METADATA_KEY,
 } from "./metadata";
 import { createMethodWrapper } from "./method-wrapper";
 import { ControllerOptions } from "./types";
@@ -40,6 +41,9 @@ import { ControllerOptions } from "./types";
  */
 export function Controller(options: ControllerOptions = {}) {
   return function <T extends { new (...args: any[]): any }>(target: T) {
+    // Mark the class as a controller by setting metadata
+    Reflect.defineMetadata(CONTROLLER_METADATA_KEY, options, target);
+
     return class extends target {
       constructor(...args: any[]) {
         super(...args);
@@ -48,17 +52,19 @@ export function Controller(options: ControllerOptions = {}) {
 
         // Wrap each method with response handling
         for (const methodName of methods) {
-          const originalMethod = target.prototype[methodName];
-
           // Skip wrapping if it has custom response handling
           if (hasCustomResponseHandling(target, methodName)) {
             continue;
           }
 
-          const shouldBenchmark = shouldBenchmarkMethod(target, methodName, !!options.benchmarking);
-          const shouldLog = shouldLogMethod(target, methodName, !!options.logging);
+          const originalMethod = this[methodName];
+          const shouldBenchmark = shouldBenchmarkMethod(
+            target,
+            methodName,
+            options.benchmarking ?? false,
+          );
+          const shouldLog = shouldLogMethod(target, methodName, options.logging ?? false);
 
-          // Create and assign the wrapper function
           this[methodName] = createMethodWrapper(
             originalMethod,
             methodName,
@@ -69,4 +75,11 @@ export function Controller(options: ControllerOptions = {}) {
       }
     };
   };
+}
+
+/**
+ * Checks if a class is decorated with @Controller
+ */
+export function isController(target: any): boolean {
+  return !!Reflect.getMetadata(CONTROLLER_METADATA_KEY, target);
 }

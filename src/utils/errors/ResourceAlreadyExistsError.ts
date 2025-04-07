@@ -21,6 +21,6 @@ import { AppError } from "@utils/errors/AppError";
  */
 export class ResourceAlreadyExistsError extends AppError {
   constructor(message: string = "Resource already exists") {
-    super(409, message);
+    super(message, 409, "RESOURCE_ALREADY_EXISTS");
   }
 }

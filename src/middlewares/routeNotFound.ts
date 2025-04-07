@@ -1,5 +1,5 @@
-import { Request, Response } from 'express';
-import { RouteNotFoundError } from '@utils/errors';
+import { Request, Response } from "express";
+import { RouteNotFoundError } from "@utils/errors";
 
 /**
  * @name routeNotFound
