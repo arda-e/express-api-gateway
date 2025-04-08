@@ -9,18 +9,21 @@ import {
   UniqueConstraintError,
   ValidationError,
 } from "@utils/errors";
-import { ExceptionHandler, Transaction, RequiresTransaction } from "@utils/decorators";
+import { ExceptionHandler, Transaction } from "@utils/decorators";
+import { EventQueue } from "@utils/queue/EventQueue";
+import { EventType } from "@utils/queue/EventTypes";
 
 //** INTERNAL MODULES
 import { User } from "./auth.model";
 import * as DTO from "./auth.dtos";
 import AuthRepository from "./auth.repository";
 
-// import RoleRepository from '@api/v1/role/repositories/role.repository';
-
 @injectable()
 export class AuthService {
-  constructor(@inject(AuthRepository) private authRepository: AuthRepository) {}
+  constructor(
+    @inject(AuthRepository) private authRepository: AuthRepository,
+    @inject(EventQueue) private eventQueue: EventQueue,
+  ) {}
 
   @ExceptionHandler("Failed to register user")
   @Transaction()
@@ -47,8 +50,12 @@ export class AuthService {
       // !TODO: Replace with the actual role ID
       trx!,
     );
-    //!TODO: Convert to logger
-    console.log("AuthService: Registration successful");
+
+    await this.eventQueue.addEvent(EventType.UserRegistered, {
+      userId: user.id,
+      email: user.email,
+    });
+
     return newUser;
   }
 
