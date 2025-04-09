@@ -1,32 +1,19 @@
-import { Queue } from "bullmq";
+import { singleton } from "tsyringe";
+import { RedisManager } from "@utils/RedisManager";
 
-import { IEventQueue } from "./IEventQueue";
-import { EventType } from "./EventTypes";
+import { BaseQueue } from "./BaseQueue";
+import { EventPayloadMap, EventType } from "./EventTypes";
 
-export class EventQueue implements IEventQueue {
-  private queue: Queue;
+@singleton()
+export class EventQueue extends BaseQueue<EventPayloadMap[EventType]> {
+  constructor(redisManager: RedisManager) {
+    super("events", redisManager);
+  }
 
-  constructor() {
-    this.queue = new Queue("event-queue", {
-      connection: {
-        host: "redis", //TODO: Get the host from the RedisManager
-        port: 6379,
-      },
+  public async addEvent<K extends EventType>(type: K, payload: EventPayloadMap[K]) {
+    return this.addJob(type, payload, {
+      attempts: 3,
+      backoff: { type: "exponential", delay: 1000 },
     });
-  }
-
-  async addEvent<T = unknown>(type: EventType, data: T) {
-    await this.queue.add(type, data);
-  }
-
-  async processEvent(event: any) {}
-  async getJobStats(): Promise<any> {
-    return this.queue.getJobCounts();
-  }
-  async removeJob(id: string): Promise<any> {
-    return this.queue.remove(id);
-  }
-  async getJob(id: string): Promise<any> {
-    return this.queue.getJob(id);
   }
 }

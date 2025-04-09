@@ -1,7 +1,7 @@
-import { createClient, RedisClientType } from 'redis';
-import { singleton } from 'tsyringe';
+import { createClient, RedisClientType } from "redis";
+import { singleton } from "tsyringe";
 
-import LoggerFactory from './Logger';
+import LoggerFactory from "./Logger";
 
 /**
  * The RedisManager class is a singleton that manages the connection to a Redis server.
@@ -27,7 +27,7 @@ export class RedisManager {
    */
   public async initialize(): Promise<void> {
     await this.initRedisClient();
-    RedisManager.logger.info('Redis client initialized');
+    RedisManager.logger.info("Redis client initialized");
   }
 
   /**
@@ -54,7 +54,7 @@ export class RedisManager {
    */
   private async initRedisClient(timeout: number = 5000, maxRetries: number = 5): Promise<void> {
     this.redisClient = createClient({
-      url: 'redis://redis:6379',
+      url: "redis://redis:6379",
       //url: `redis://${Config.app.session.redis.host}:${Config.app.session.redis.port}`,
     });
     let attempts = 0;
@@ -95,16 +95,19 @@ export class RedisManager {
         }, timeout) as NodeJS.Timeout;
       });
 
-      // !TODO:
+      if (this.redisClient.isOpen) {
+        return Promise.resolve();
+      }
+
       this.redisClient.connect();
 
       const connectPromise = new Promise<void>((resolve, reject) => {
-        this.redisClient.on('connect', () => {
+        this.redisClient.on("connect", () => {
           clearTimeout(connectionTimeout as NodeJS.Timeout);
           resolve();
         });
 
-        this.redisClient.on('error', (err) => {
+        this.redisClient.on("error", (err) => {
           clearTimeout(connectionTimeout as NodeJS.Timeout);
           reject(err);
         });
@@ -124,7 +127,7 @@ export class RedisManager {
   public async close(): Promise<void> {
     if (this.redisClient) {
       await this.redisClient.quit();
-      RedisManager.logger.info('Redis client disconnected.');
+      RedisManager.logger.info("Redis client disconnected.");
     }
   }
 }
