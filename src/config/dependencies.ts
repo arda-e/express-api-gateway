@@ -6,6 +6,10 @@ import DatabaseFactory from "@db/db.manager";
 import LoggerFactory from "@utils/Logger";
 import DatabaseManager from "@db/db.manager";
 import { AuthRepository, AuthService } from "@api/v1/auth";
+import { EventQueue } from "@utils/queue/EventQueue";
+import { DeadLetterQueue } from "@utils/queue/DeadLetterQueue";
+import QueueService from "@api/v1/queue/queue.service";
+import QueueController from "@api/v1/queue/queue.controller";
 
 import SessionConfig from "./sessionConfig";
 
@@ -38,6 +42,28 @@ export const initializeServerDependencies = async (
 export const initializeAppDependencies = (): void => {
   try {
     logger.info("Initializing application dependencies...");
+    // Register EventQueue with RedisManager dependency
+    container.register(EventQueue, {
+      useFactory: (container) => {
+        const redisManager = container.resolve(RedisManager);
+        return new EventQueue(redisManager);
+      },
+    });
+    // Register DeadLetterQueue with RedisManager dependency
+    container.register(DeadLetterQueue, {
+      useFactory: (container) => {
+        const redisManager = container.resolve(RedisManager);
+        return new DeadLetterQueue(redisManager);
+      },
+    });
+    // Register QueueService
+    container.register(QueueService, {
+      useClass: QueueService,
+    });
+    // Register QueueController
+    container.register(QueueController, {
+      useClass: QueueController,
+    });
     container.resolve(DatabaseManager);
     container.resolve(AuthRepository);
     container.resolve(AuthService);
