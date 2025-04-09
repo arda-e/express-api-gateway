@@ -347,6 +347,18 @@ export class AuthController {
     await this.authService.changePassword(userId, newPassword);
     return ApiResponse.success(null, "Password changed successfully");
   }
+
+  @Route()
+  public async verifyEmail(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<ApiResponse<null>> {
+    const { token } = req.body as DTO.VerifyEmailRequestDTO;
+
+    await this.authService.verifyEmail(token);
+    return ApiResponse.success(null, "Email verified successfully");
+  }
 }
 
 export default container.resolve(AuthController);

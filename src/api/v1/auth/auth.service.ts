@@ -2,6 +2,7 @@
 import bcrypt from "bcryptjs";
 import { inject, injectable } from "tsyringe";
 import { Knex } from "knex";
+import jwt from "jsonwebtoken";
 //** INTERNAL UTILS
 import {
   AuthenticationError,
@@ -52,8 +53,8 @@ export class AuthService {
     );
 
     await this.eventQueue.addEvent(EventType.UserRegistered, {
-      userId: user.id,
-      email: user.email,
+      userId: newUser.id,
+      email: newUser.email,
     });
 
     return newUser;
@@ -137,6 +138,14 @@ export class AuthService {
       console.error("Error validating password:", error);
       throw new ValidationError("Password validation failed");
     }
+  }
+
+  @ExceptionHandler("Failed to verify email")
+  @Transaction()
+  async verifyEmail(token: string, trx?: Knex.Transaction): Promise<void> {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const { email } = decoded;
+    await this.authRepository.update(email, { emailVerified: true }, trx!);
   }
 }
 

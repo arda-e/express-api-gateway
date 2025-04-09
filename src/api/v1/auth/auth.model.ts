@@ -1,6 +1,6 @@
 //** EXTERNAL LIBRARIES
 import bcrypt from "bcryptjs";
-import { IsArray, IsEmail, IsString, Length, ValidateNested } from "class-validator";
+import { IsArray, IsBoolean, IsEmail, IsString, Length, ValidateNested } from "class-validator";
 import { Type } from "class-transformer";
 //** LOCAL MODULES
 import BaseModel from "@utils/Model";
@@ -60,6 +60,9 @@ export class User extends BaseModel {
   @ValidateNested({ each: true })
   @Type(() => Role)
   roles: Role[];
+
+  @IsBoolean()
+  emailVerified: boolean;
 
   constructor(
     id: string | undefined,
