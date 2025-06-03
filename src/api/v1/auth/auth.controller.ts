@@ -347,36 +347,6 @@ export class AuthController {
     await this.authService.changePassword(userId, newPassword);
     return ApiResponse.success(null, "Password changed successfully");
   }
-
-  @Route()
-  public async verifyEmail(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ): Promise<ApiResponse<null>> {
-    const { token } = req.body as DTO.VerifyEmailRequestDTO;
-
-    await this.authService.verifyEmail(token);
-    return ApiResponse.success(null, "Email verified successfully");
-  }
-
-  @Route()
-  @Logger()
-  @Benchmark()
-  public async checkAuth(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ): Promise<ApiResponse<{ success: boolean }>> {
-    const token = req.cookies.auth_token;
-
-    if (!token) {
-      throw new AuthenticationError("Not authenticated");
-    }
-
-    const isValid = await this.authService.checkAuth(req);
-    return ApiResponse.success({ success: isValid });
-  }
 }
 
 export default container.resolve(AuthController);

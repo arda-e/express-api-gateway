@@ -61,19 +61,12 @@ export class AuthService {
   }
 
   @ExceptionHandler("Failed to login user")
-  async login(email: string, password: string): Promise<User> {
-    const user = await this.authRepository.findByEmail(email);
-
-    if (!user) {
-      throw new AuthenticationError("User not found");
-    }
+  async login(username: string, password: string): Promise<User> {
+    const user = await this.authRepository.findByEmail(username);
+    if (!user) throw new AuthenticationError("User not found");
 
     const isPasswordValid = await user.validatePassword(password);
-
-    if (!isPasswordValid) {
-      throw new AuthenticationError("Invalid password");
-    }
-
+    if (!isPasswordValid) throw new AuthenticationError("Invalid password");
     return user;
   }
 
@@ -130,7 +123,6 @@ export class AuthService {
     return await this.authRepository.update(userId, { password: cryptPassword }, trx!);
   }
 
-  // Revert to original implementation for this security-critical method
   async validatePassword(plainTextPassword: string, hashedPassword: string): Promise<boolean> {
     try {
       return await bcrypt.compare(plainTextPassword, hashedPassword);
@@ -138,14 +130,6 @@ export class AuthService {
       console.error("Error validating password:", error);
       throw new ValidationError("Password validation failed");
     }
-  }
-
-  @ExceptionHandler("Failed to verify email")
-  @Transaction()
-  async verifyEmail(token: string, trx?: Knex.Transaction): Promise<void> {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const { email } = decoded;
-    await this.authRepository.update(email, { emailVerified: true }, trx!);
   }
 }
 

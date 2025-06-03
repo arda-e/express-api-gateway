@@ -3,24 +3,32 @@ import { authRequired } from "@middlewares";
 import { container } from "tsyringe";
 
 import QueueController from "./queue.controller";
+import { render } from "../../../ui/entry-server";
 
 const router = Router();
 const queueController = container.resolve(QueueController);
 
-router.get("/items", authRequired, queueController.getAllItemsInQueue);
-router.post("/requeue", authRequired, queueController.requeueFromDLQ);
+// All queue routes require authentication
+router.use(authRequired);
+
+router.get("/items", queueController.getAllItemsInQueue);
+router.post("/requeue", queueController.requeueFromDLQ);
 router.get("/dashboard", (req, res) => {
-  res.setHeader("Content-Type", "text/html");
+  const html = render();
   res.send(`
-      <!DOCTYPE html>
-      <html>
-        <head><title>Queue Dashboard</title></head>
-        <body>
-          <h1>Hello, Queue World!</h1>
-          <p>This is a placeholder for the SSR React queue dashboard.</p>
-        </body>
-      </html>
-    `);
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="UTF-8">
+        <title>Queue Dashboard</title>
+        <link rel="stylesheet" href="/public/styles.css">
+      </head>
+      <body>
+        <div id="root">${html}</div>
+        <script type="module" src="/static/entry-client.js"></script>
+      </body>
+    </html>
+  `);
 });
 
 export default router;
