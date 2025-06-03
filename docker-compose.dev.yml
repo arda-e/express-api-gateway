@@ -13,7 +13,7 @@ services:
       - "${DEV_DEBUG_PORT:-9229}:${DEV_DEBUG_PORT:-9229}"
     volumes:
       - .:/usr/src/app
-      - /usr/src/app/node_modules
+      - ./dist/client:/usr/src/app/dist/client
     env_file:
       - .env
     depends_on:
