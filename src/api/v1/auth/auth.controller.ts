@@ -359,6 +359,24 @@ export class AuthController {
     await this.authService.verifyEmail(token);
     return ApiResponse.success(null, "Email verified successfully");
   }
+
+  @Route()
+  @Logger()
+  @Benchmark()
+  public async checkAuth(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<ApiResponse<{ success: boolean }>> {
+    const token = req.cookies.auth_token;
+
+    if (!token) {
+      throw new AuthenticationError("Not authenticated");
+    }
+
+    const isValid = await this.authService.checkAuth(req);
+    return ApiResponse.success({ success: isValid });
+  }
 }
 
 export default container.resolve(AuthController);
