@@ -4,6 +4,7 @@ import LoggerFactory from "@utils/Logger";
 import Config from "@config/config";
 import { initializeAppDependencies, initializeServerDependencies } from "@config/dependencies";
 import SessionConfig from "@config/sessionConfig";
+import { setupWebSocket } from "@config/websocket";
 
 import DatabaseManager from "./db/db.manager";
 
@@ -41,6 +42,7 @@ const startServer = async (
       logger.info(`API Gateway running on port ${SERVER_PORT}`);
     });
 
+    setupWebSocket(server);
     setupEventListeners(server);
     return server;
   } catch (error: unknown) {
