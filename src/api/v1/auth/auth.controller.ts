@@ -6,10 +6,10 @@ import { container, injectable, delay, inject } from "tsyringe";
 import { AuthenticationError, InternalServerError } from "@utils/errors/";
 import { ApiResponse } from "@utils/Response";
 import { Route, Benchmark, Logger, InvalidateCache, Controller, Cache } from "@utils/decorators";
+import { AuthService } from "@api/v1/auth";
 
 import * as DTO from "./auth.dtos";
 import { UserModel } from "./auth.model";
-import AuthService from "./auth.service";
 
 @Controller({ logging: true, benchmarking: true })
 @injectable()

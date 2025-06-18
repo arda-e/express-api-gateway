@@ -72,6 +72,19 @@ class Role extends BaseModel {
   @IsArray()
   @IsString({ each: true, message: "Each user ID must be a string" })
   users?: string[];
+
+  toRecord(): Record<string, any> {
+    return {
+      id: this.id,
+      name: this.name,
+      description: this.description,
+      is_active: this.isActive,
+      permissions: this.permissions,
+      users: this.users,
+      created_at: this.created_at,
+      updated_at: this.updated_at,
+    };
+  }
 }
 
 export default Role;
