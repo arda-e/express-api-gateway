@@ -25,8 +25,10 @@ export function buildTransitionMap<S extends string, E extends string>(
 ): TransitionMap<S, E> {
   return rules.reduce(
     (map, [from, event, to]) => {
-      if (!map[from]) map[from] = {};
-      map[from]![event] = to;
+      if (!map[from]) {
+        map[from] = {} as Partial<Record<E, S>>;
+      }
+      (map[from] as Partial<Record<E, S>>)[event] = to;
       return map;
     },
     {} as TransitionMap<S, E>,

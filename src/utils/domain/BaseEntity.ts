@@ -1,6 +1,6 @@
 import { FSM } from "@utils/domain/FSM";
 import { TransitionMap } from "@utils/domain/domain.types";
-import { DomainEvent } from "@api/v1/auth/auth.entity";
+import { DomainEvent } from "@utils/domain";
 
 export abstract class BaseEntity<State extends string, Event extends string> {
   protected _state: State;
