@@ -1,5 +1,6 @@
 import { RedisManager } from "@utils/RedisManager";
 import { Queue, JobsOptions, JobState, Job } from "bullmq";
+import { EventType } from "@utils/queue/EventTypes";
 
 import { IQueue } from "./IQueue";
 
@@ -39,5 +40,15 @@ export abstract class BaseQueue<T> implements IQueue<T> {
 
   public async getJobs(state: JobState | JobState[]): Promise<Job[]> {
     return this.queue.getJobs(state);
+  }
+
+  public async dispatchMany(events: { type: EventType; payload: any }[]): Promise<void> {
+    const jobs = events.map((e) =>
+      this.queue.add(e.type, e.payload, {
+        attempts: 3,
+        backoff: { type: "exponential", delay: 1000 },
+      }),
+    );
+    await Promise.all(jobs);
   }
 }

@@ -1,18 +1,15 @@
-//** EXTERNAL LIBRARIES
 import { inject, injectable } from "tsyringe";
 import { Knex } from "knex";
-//** INTERNAL UTILS
 import DatabaseManager from "@db/db.manager";
 import { KnexRepository } from "@utils/Repository";
 import { ExceptionHandler } from "@utils/decorators/ExceptionHandler";
 import { RequiresTransaction } from "@utils/decorators/Transaction";
-//** LOCAL MODULES
 import { Role, RoleUser } from "@api/v1/role/models";
 
-import { User } from "./auth.model";
+import { UserModel } from "./auth.model";
 
 @injectable()
-class AuthRepository extends KnexRepository<User> {
+class AuthRepository extends KnexRepository<UserModel> {
   constructor(@inject(DatabaseManager) protected databaseManager: DatabaseManager) {
     super(databaseManager);
   }
@@ -29,18 +26,12 @@ class AuthRepository extends KnexRepository<User> {
     password: string,
     roleIds: string[],
     trx: Knex.Transaction,
-  ): Promise<User> {
-    const user = new User(undefined, username, email, password);
+  ): Promise<UserModel> {
+    const user = new UserModel(username, email, password);
     await user.hashPassword();
 
     const query = this.getQueryBuilder(trx);
-    const [createdUser] = await query
-      .insert({
-        username: user.username,
-        email: user.email,
-        password: user.password,
-      })
-      .returning("*");
+    const [createdUser] = await query.insert(user.toRecord()).returning("*");
 
     if (roleIds?.length > 0) {
       const roleQuery = this.db("authentication.user_roles").transacting(trx);
@@ -50,23 +41,29 @@ class AuthRepository extends KnexRepository<User> {
     }
 
     const roles = await this.getUserRoles(createdUser.id, trx);
-    return new User(
-      createdUser.id,
-      createdUser.username,
-      createdUser.email,
-      createdUser.password,
-      roles,
-    );
+    return UserModel.fromRecord({ ...createdUser, roles });
   }
 
   @ExceptionHandler((params: { email: string }) => `Failed to find user by email ${params.email}`)
-  async findByEmail(email: string, trx?: Knex.Transaction): Promise<User | null> {
+  async findByEmail(email: string, trx?: Knex.Transaction): Promise<UserModel | null> {
     const query = this.getQueryBuilder(trx);
-    const user = await query.where({ email }).first();
+    const row = await query.where({ email }).first();
 
-    if (user) {
-      const roles = await this.getUserRoles(user.id, trx);
-      return new User(user.id, user.username, user.email, user.password, roles);
+    if (row) {
+      const roles = await this.getUserRoles(row.id, trx);
+      return UserModel.fromRecord({ ...row, roles });
+    }
+
+    return null;
+  }
+
+  async findById(id: string, trx?: Knex.Transaction): Promise<UserModel | null> {
+    const query = this.getQueryBuilder(trx);
+    const row = await query.where({ id }).first();
+
+    if (row) {
+      const roles = await this.getUserRoles(row.id, trx);
+      return UserModel.fromRecord({ ...row, roles });
     }
 
     return null;
@@ -86,22 +83,20 @@ class AuthRepository extends KnexRepository<User> {
 
   @ExceptionHandler((userId) => `Failed to update user ${userId}`)
   @RequiresTransaction()
-  async update(userId: string, updateData: Partial<User>, trx: Knex.Transaction): Promise<User> {
+  async update(
+    userId: string,
+    updateData: Partial<UserModel>,
+    trx: Knex.Transaction,
+  ): Promise<UserModel> {
     const query = this.getQueryBuilder(trx);
-    const [updatedUser] = await query.where({ id: userId }).update(updateData).returning("*");
+    const [updatedRow] = await query.where({ id: userId }).update(updateData).returning("*");
 
-    if (!updatedUser) {
+    if (!updatedRow) {
       throw new Error("User not found");
     }
 
-    const roles = await this.getUserRoles(updatedUser.id, trx);
-    return new User(
-      updatedUser.id,
-      updatedUser.username,
-      updatedUser.email,
-      updatedUser.password,
-      roles,
-    );
+    const roles = await this.getUserRoles(updatedRow.id, trx);
+    return UserModel.fromRecord({ ...updatedRow, roles });
   }
 
   @ExceptionHandler((userId) => `Failed to delete user ${userId}`)

@@ -8,7 +8,7 @@ import { ApiResponse } from "@utils/Response";
 import { Route, Benchmark, Logger, InvalidateCache, Controller, Cache } from "@utils/decorators";
 
 import * as DTO from "./auth.dtos";
-import { User } from "./auth.model";
+import { UserModel } from "./auth.model";
 import AuthService from "./auth.service";
 
 @Controller({ logging: true, benchmarking: true })
@@ -63,7 +63,7 @@ export class AuthController {
     req: Request,
     res: Response,
     next: NextFunction,
-  ): Promise<ApiResponse<User>> {
+  ): Promise<ApiResponse<UserModel>> {
     const { username, email, password } = req.body as DTO.RegisterUserRequestDTO;
 
     const user = await this.authService.register(username, email, password);
