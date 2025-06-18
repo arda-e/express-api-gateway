@@ -113,15 +113,15 @@ export class UserModel extends BaseModel {
 
   static fromRecord(row: any): UserModel {
     return new UserModel(
-      row.id,
       row.username,
       row.email,
       row.password,
-      row.roles ?? [],
       row.email_verified,
+      row.roles ?? [],
+      row.state,
+      row.id,
       row.created_at,
       row.updated_at,
-      row.state,
     );
   }
 }
