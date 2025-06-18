@@ -98,9 +98,11 @@ export class AuthService {
     const user = await this.authRepository.findById(userId, trx);
     if (!user) throw new ResourceDoesNotExistError("User not found");
 
-    const entity = UserEntity.create(user).transition(UserAction.DELETE).raise(USER_DELETED);
+    const entity = UserEntity.create(user)
+      .transition(UserAction.DELETE)
+      .raise(USER_DELETED as unknown as EventType);
 
-    await this.eventQueue.dispatchMany(entity.getDomainEvents());
+    await this.eventQueue.dispatchMany(entity.getDomainEvents() as any);
     return await this.authRepository.deleteById(userId, trx!);
   }
 
@@ -118,9 +120,9 @@ export class AuthService {
 
     const entity = UserEntity.create(user)
       .transition(UserAction.RESET_PASSWORD)
-      .raise(USER_PASSWORD_RESET);
+      .raise(USER_PASSWORD_RESET as unknown as EventType);
 
-    await this.eventQueue.dispatchMany(entity.getDomainEvents());
+    await this.eventQueue.dispatchMany(entity.getDomainEvents() as any);
     return await this.authRepository.update(userId, { password: cryptPassword }, trx!);
   }
 
