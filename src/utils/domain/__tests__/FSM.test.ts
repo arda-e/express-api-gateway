@@ -1,0 +1,78 @@
+import { FSM, allow, buildTransitionMap, chainableTransition } from "@utils/domain";
+
+enum MachineState {
+  Idle = "idle",
+  Running = "running",
+}
+
+enum MachineEvent {
+  Start = "START",
+  Stop = "STOP",
+}
+
+const transitionsList = [
+  allow(MachineState.Idle, MachineEvent.Start, MachineState.Running),
+  allow(MachineState.Running, MachineEvent.Stop, MachineState.Idle),
+] as const;
+
+const transitions = buildTransitionMap(transitionsList);
+
+describe("FSM", () => {
+  let fsm: FSM<MachineState, MachineEvent>;
+
+  beforeEach(() => {
+    fsm = new FSM(MachineState.Idle, transitions);
+  });
+
+  it("returns the initial state", () => {
+    expect(fsm.getState()).toBe(MachineState.Idle);
+  });
+
+  it("canTransition returns true for a valid transition", () => {
+    expect(fsm.canTransition(MachineEvent.Start)).toBe(true);
+  });
+
+  it("canTransition returns false for an invalid transition", () => {
+    expect(fsm.canTransition(MachineEvent.Stop)).toBe(false);
+  });
+
+  it("transitions to the next state when valid", () => {
+    fsm.transition(MachineEvent.Start);
+    expect(fsm.getState()).toBe(MachineState.Running);
+  });
+
+  it("throws an error for an invalid transition", () => {
+    expect(() => fsm.transition(MachineEvent.Stop)).toThrow(
+      `Invalid transition from ${MachineState.Idle} on ${MachineEvent.Stop}`,
+    );
+  });
+
+  it("supports sequential transitions", () => {
+    fsm.transition(MachineEvent.Start);
+    expect(fsm.getState()).toBe(MachineState.Running);
+    fsm.transition(MachineEvent.Stop);
+    expect(fsm.getState()).toBe(MachineState.Idle);
+  });
+});
+
+describe("Transition helpers", () => {
+  it("allow returns a transition tuple", () => {
+    const tuple = allow(MachineState.Idle, MachineEvent.Start, MachineState.Running);
+    expect(tuple).toEqual([MachineState.Idle, MachineEvent.Start, MachineState.Running]);
+  });
+
+  it("buildTransitionMap constructs the correct map", () => {
+    const map = buildTransitionMap(transitionsList);
+    expect(map).toEqual({
+      [MachineState.Idle]: { [MachineEvent.Start]: MachineState.Running },
+      [MachineState.Running]: { [MachineEvent.Stop]: MachineState.Idle },
+    });
+  });
+
+  it("chainableTransition executes the transition and returns the entity", () => {
+    const entity = { transition: jest.fn() };
+    const result = chainableTransition(entity, MachineEvent.Start);
+    expect(entity.transition).toHaveBeenCalledWith(MachineEvent.Start);
+    expect(result).toBe(entity);
+  });
+});
