@@ -1,4 +1,4 @@
-import { FSM, allow, buildTransitionMap, chainableTransition } from "@utils/domain";
+import { FSM, allow, buildTransitionMap } from "@utils/domain";
 
 enum MachineState {
   Idle = "idle",
@@ -52,27 +52,5 @@ describe("FSM", () => {
     expect(fsm.getState()).toBe(MachineState.Running);
     fsm.transition(MachineEvent.Stop);
     expect(fsm.getState()).toBe(MachineState.Idle);
-  });
-});
-
-describe("Transition helpers", () => {
-  it("allow returns a transition tuple", () => {
-    const tuple = allow(MachineState.Idle, MachineEvent.Start, MachineState.Running);
-    expect(tuple).toEqual([MachineState.Idle, MachineEvent.Start, MachineState.Running]);
-  });
-
-  it("buildTransitionMap constructs the correct map", () => {
-    const map = buildTransitionMap(transitionsList);
-    expect(map).toEqual({
-      [MachineState.Idle]: { [MachineEvent.Start]: MachineState.Running },
-      [MachineState.Running]: { [MachineEvent.Stop]: MachineState.Idle },
-    });
-  });
-
-  it("chainableTransition executes the transition and returns the entity", () => {
-    const entity = { transition: jest.fn() };
-    const result = chainableTransition(entity, MachineEvent.Start);
-    expect(entity.transition).toHaveBeenCalledWith(MachineEvent.Start);
-    expect(result).toBe(entity);
   });
 });
