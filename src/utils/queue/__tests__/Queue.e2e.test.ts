@@ -1,5 +1,51 @@
 import "reflect-metadata";
 
+// Mock RedisManager to avoid real Redis connections during tests
+jest.mock("@utils/RedisManager", () => {
+  class MockRedisManager {
+    public async initialize() {}
+    public getRedisClient() {
+      return {};
+    }
+    public async close() {}
+  }
+  return { RedisManager: MockRedisManager };
+});
+
+// Lightweight in-memory stub for bullmq used by the queues
+jest.mock("bullmq", () => {
+  let id = 0;
+  return {
+    Queue: jest.fn().mockImplementation(() => {
+      const jobs: any[] = [];
+      return {
+        add: jest.fn(async (name: string, data: any) => {
+          const job = {
+            id: String(++id),
+            name,
+            data,
+            remove: async () => {
+              const idx = jobs.findIndex((j) => j.id === job.id);
+              if (idx !== -1) jobs.splice(idx, 1);
+            },
+          };
+          jobs.push(job);
+          return job;
+        }),
+        getJob: jest.fn(async (jobId: string) => jobs.find((j) => j.id === jobId) || null),
+        getJobs: jest.fn(async () => [...jobs]),
+        getWaitingCount: jest.fn(async () => jobs.length),
+        getActiveCount: jest.fn(async () => 0),
+        getCompletedCount: jest.fn(async () => 0),
+        getFailedCount: jest.fn(async () => 0),
+        getDelayedCount: jest.fn(async () => 0),
+      };
+    }),
+    Worker: jest.fn(),
+    Job: jest.fn(),
+  };
+});
+
 import { container } from "tsyringe";
 import { RedisManager } from "@utils/RedisManager";
 
@@ -13,6 +59,7 @@ describe("Queue E2E", () => {
   let redisManager: RedisManager;
 
   beforeAll(async () => {
+    // Instances resolved here use the mocked RedisManager and bullmq
     redisManager = container.resolve(RedisManager);
     await redisManager.initialize();
     eventQueue = container.resolve(EventQueue);
