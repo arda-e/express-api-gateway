@@ -1,5 +1,6 @@
 //** EXTERNAL LIBRARIES
 import { inject, injectable } from "tsyringe";
+import { Knex } from "knex";
 //** INTERNAL UTILS
 import { KnexRepository } from "@utils/Repository";
 import DatabaseManager from "@db/db.manager";
@@ -32,6 +33,18 @@ class PermissionRepository extends KnexRepository<Permission> {
       data,
       total: Number(totalResult?.total || 0),
     };
+  }
+
+  public async findByUserId(userId: string, trx?: Knex.Transaction): Promise<Permission[]> {
+    const query = trx
+      ? this.db(this.getTableName()).transacting(trx)
+      : this.db(this.getTableName());
+
+    return query
+      .join("role_permissions", "permissions.id", "role_permissions.permission_id")
+      .join("user_roles", "role_permissions.role_id", "user_roles.role_id")
+      .where("user_roles.user_id", userId)
+      .select("permissions.*");
   }
 }
 

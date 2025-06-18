@@ -1,8 +1,8 @@
-import { injectable, inject } from 'tsyringe';
-import { ResourceAlreadyExistsError, ResourceDoesNotExistError } from '@utils/errors';
+import { injectable, inject } from "tsyringe";
+import { ResourceAlreadyExistsError, ResourceDoesNotExistError } from "@utils/errors";
 
-import Permission from './permission.model';
-import PermissionRepository from './permission.repository';
+import Permission from "./permission.model";
+import PermissionRepository from "./permission.repository";
 
 @injectable()
 class PermissionService {
@@ -19,24 +19,23 @@ class PermissionService {
   public async getPermission(permissionId: string): Promise<Permission | null> {
     const existingPermission = await this.permissionRepository.findById(permissionId);
     if (!existingPermission) {
-      throw new ResourceDoesNotExistError('Permission not found');
+      throw new ResourceDoesNotExistError("Permission not found");
     }
     return existingPermission;
   }
 
-  //!TODO It should return Permission[] but currently it returns Permission[]
   public async getPermissionByUserId(userId: string): Promise<Permission[]> {
-    const permissions = await this.permissionRepository.findByField('id', userId);
-    if (!permissions) {
-      throw new ResourceDoesNotExistError('Permissions not found');
+    const permissions = await this.permissionRepository.findByUserId(userId);
+    if (!permissions || permissions.length === 0) {
+      throw new ResourceDoesNotExistError("Permissions not found");
     }
     return permissions;
   }
 
   public async createPermission(permission: Permission): Promise<Permission> {
-    const existingPermission = await this.permissionRepository.findByField('name', permission.name);
+    const existingPermission = await this.permissionRepository.findByField("name", permission.name);
     if (existingPermission) {
-      throw new ResourceAlreadyExistsError('Permission already exists');
+      throw new ResourceAlreadyExistsError("Permission already exists");
     }
     return await this.permissionRepository.create(permission);
   }
@@ -54,7 +53,7 @@ class PermissionService {
   private async ensurePermissionExists(permissionId: string): Promise<Permission> {
     const existingPermission = await this.permissionRepository.findById(permissionId);
     if (!existingPermission) {
-      throw new ResourceDoesNotExistError('Permission not found');
+      throw new ResourceDoesNotExistError("Permission not found");
     }
     return existingPermission;
   }
