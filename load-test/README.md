@@ -1,6 +1,6 @@
 # Load Testing Container
 
-This container, written in TypeScript, generates 100,000 unique users using the OpenAI API and then runs a k6 test that registers each user through the gateway. Test metrics are pushed to Elasticsearch.
+This container generates 100,000 unique users using the OpenAI API and then runs a k6 script that registers each user through the gateway. Before starting, a health check verifies Elasticsearch, Kibana, and the gateway are reachable. Test metrics are pushed to Elasticsearch.
 
 ## Usage
 
