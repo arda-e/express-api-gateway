@@ -51,8 +51,6 @@ services:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     depends_on:
       - elasticsearch
-
-
 volumes:
   esdata:
     driver: local

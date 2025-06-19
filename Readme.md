@@ -41,7 +41,7 @@ A robust, scalable API Gateway built with Express.js and TypeScript implementing
   - Advanced logging with Winston
   - Log rotation and management
   - Error handling and reporting
-  - Optional Elasticsearch + Kibana integration for analytics
+  - Elasticsearch + Kibana integration for analytics
 
 - **Dependency Injection**:
   - Inversion of Control (IoC) container
