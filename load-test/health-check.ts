@@ -16,9 +16,9 @@ function check(url: string): Promise<void> {
 
 async function main() {
   const targets = [
-    "http://express:8000/api/v1/admin/health",
-    "http://elasticsearch:9200/_cluster/health",
-    "http://kibana:5601/api/status",
+    process.env.EXPRESS_HEALTH_URL || "http://localhost:8000/api/v1/admin/health",
+    process.env.ELASTICSEARCH_HEALTH_URL || "http://localhost:9200/_cluster/health",
+    process.env.KIBANA_HEALTH_URL || "http://localhost:5601/api/status",
   ];
   for (const url of targets) {
     await check(url);

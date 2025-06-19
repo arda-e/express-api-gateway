@@ -3,4 +3,5 @@ node_modules
 .env.loadtest
 .idea
 dist
+load-test/users.json
 *.log
