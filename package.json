@@ -4,7 +4,7 @@
   "main": "dist/index.js",
   "scripts": {
     "start": "node dist/index.js",
-    "start:worker": "ts-node src/utils/queue/Worker.ts",
+    "start:worker": "ts-node -r tsconfig-paths/register src/utils/queue/Worker.ts",
     "build": "tsc",
     "dev": "tsx watch --inspect=0.0.0.0:9229 src/index.ts",
     "test": "jest",
