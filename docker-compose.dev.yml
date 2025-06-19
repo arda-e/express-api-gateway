@@ -90,6 +90,18 @@ services:
       - elasticsearch
     networks:
       - express-gateway-network
+
+  loadtest:
+    build:
+      context: ./load-test
+    environment:
+      - TARGET_URL=http://express:${DEV_PORT:-8000}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    depends_on:
+      - express
+      - elasticsearch
+    networks:
+      - express-gateway-network
 networks:
   express-gateway-network:
     driver: bridge

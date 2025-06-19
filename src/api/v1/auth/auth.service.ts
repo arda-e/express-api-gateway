@@ -13,6 +13,9 @@ import { EventQueue } from "@utils/queue/EventQueue";
 import { UserEntity } from "@api/v1/auth/auth.entity";
 import { UserAction, USER_DELETED, USER_PASSWORD_RESET } from "@api/v1/auth/auth.states";
 import { EventType } from "@utils/queue/EventTypes";
+import Config from "@config/config";
+import LoggerFactory from "@utils/Logger";
+import { RoleRepository } from "@api/v1/role/repositories";
 
 import { UserModel } from "./auth.model";
 import * as DTO from "./auth.dtos";
@@ -27,7 +30,10 @@ export class AuthService {
     @inject(EventQueue) private eventQueue: EventQueue,
     @inject(VerificationTokenRepository)
     private tokenRepository: VerificationTokenRepository,
+    @inject(RoleRepository) private roleRepository: RoleRepository,
   ) {}
+
+  private logger = LoggerFactory.getLogger();
 
   @ExceptionHandler("Failed to register user")
   @Transaction()
@@ -40,11 +46,18 @@ export class AuthService {
     const existingUser = await this.authRepository.findByEmail(email, trx);
     if (existingUser) throw new UniqueConstraintError("User already exists");
 
+    const [defaultRole] = await this.roleRepository.findByField(
+      "name",
+      Config.app.defaultRoleName,
+      trx,
+    );
+    if (!defaultRole) throw new Error("Default role not found");
+
     const newUser = await this.authRepository.createUser(
       username,
       email,
       password,
-      ["cbd0bdfe-6240-4a9d-8882-e1df7a9938ed"],
+      [defaultRole.id],
       trx!,
     );
 
@@ -151,7 +164,7 @@ export class AuthService {
     try {
       return await bcrypt.compare(plainTextPassword, hashedPassword);
     } catch (error) {
-      console.error("Error validating password:", error);
+      this.logger.error("Error validating password:", error);
       throw new ValidationError("Password validation failed");
     }
   }

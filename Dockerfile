@@ -20,7 +20,7 @@ ENV NODE_ENV=production
 COPY . .
 RUN npm run build
 COPY scripts/wait-for-it.sh /usr/src/app/scripts/wait-for-it.sh
-CMD concurrently npx tsup
+RUN npx tsup
 EXPOSE 8000
 
 CMD ["/usr/src/app/scripts/wait-for-it.sh", "postgres:5432", "--", "node", "dist/index.js"]

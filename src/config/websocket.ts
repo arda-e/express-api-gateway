@@ -1,11 +1,13 @@
 import { WebSocketServer } from "ws";
 import { Server } from "http";
+import LoggerFactory from "@utils/Logger";
 
 export const setupWebSocket = (server: Server): void => {
+  const logger = LoggerFactory.getLogger();
   const wss = new WebSocketServer({ server });
 
   wss.on("connection", (ws) => {
-    console.log("WebSocket client connected");
+    logger.info("WebSocket client connected");
 
     ws.send(JSON.stringify({ message: "👋 Hello from WebSocket server" }));
 
@@ -18,7 +20,7 @@ export const setupWebSocket = (server: Server): void => {
     }, 3000);
 
     ws.on("close", () => {
-      console.log("Client disconnected");
+      logger.info("Client disconnected");
       clearInterval(interval);
       clearInterval(interval2);
     });

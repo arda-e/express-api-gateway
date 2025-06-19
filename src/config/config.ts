@@ -39,6 +39,7 @@ const config = {
       user: process.env.SMTP_USER || "",
       pass: process.env.SMTP_PASS || "",
     },
+    defaultRoleName: "User",
   },
   analytics: {
     enabled: process.env.ANALYTICS_ENABLED === "true",

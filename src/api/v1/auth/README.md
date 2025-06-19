@@ -9,7 +9,7 @@ The User model serves as a central entity in the authentication system with the 
 - Users can have multiple roles
 - Connection through `authentication.user_roles` junction table
 - Roles provide groupings of permissions
-- Default role ID: 'cbd0bdfe-6240-4a9d-8882-e1df7a9938ed' (!TODO: FIX)
+- Users are assigned the `User` role by default
 
 ### User → Permissions (Many-to-Many through Roles)
 
