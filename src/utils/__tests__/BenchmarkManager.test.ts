@@ -2,8 +2,8 @@ import { BenchmarkManager } from "../decorators/common/BenchmarkManager";
 
 describe("BenchmarkManager", () => {
   let benchmarkManager: BenchmarkManager;
-  let originalConsoleLog: any;
-  let mockConsoleLog: jest.Mock;
+  let originalLogger: any;
+  let mockLogger: { info: jest.Mock };
 
   // Set up fake timers for the entire test suite
   beforeAll(() => {
@@ -17,15 +17,15 @@ describe("BenchmarkManager", () => {
   beforeEach(() => {
     benchmarkManager = new BenchmarkManager();
 
-    // Mock console.log
-    originalConsoleLog = console.log;
-    mockConsoleLog = jest.fn();
-    console.log = mockConsoleLog;
+    // Mock logger
+    originalLogger = (benchmarkManager as any).logger;
+    mockLogger = { info: jest.fn() } as any;
+    (benchmarkManager as any).logger = mockLogger;
   });
 
   afterEach(() => {
-    // Restore console.log
-    console.log = originalConsoleLog;
+    // Restore logger
+    (benchmarkManager as any).logger = originalLogger;
     jest.clearAllMocks();
   });
 
@@ -57,9 +57,11 @@ describe("BenchmarkManager", () => {
       // End the benchmark
       benchmarkManager.end("testMethod");
 
-      // Verify console.log was called with the correct message
-      expect(mockConsoleLog).toHaveBeenCalledTimes(1);
-      expect(mockConsoleLog).toHaveBeenCalledWith('[Benchmark] Method "testMethod" took 100.00 ms');
+      // Verify logger.info was called with the correct message
+      expect(mockLogger.info).toHaveBeenCalledTimes(1);
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        '[Benchmark] Method "testMethod" took 100.00 ms',
+      );
     });
 
     it("should throw error if start() was not called", () => {

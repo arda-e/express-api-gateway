@@ -1,26 +1,26 @@
-# Stage 1: Base Stage
-FROM node:18 AS base
+# Build Stage
+FROM node:18 AS build
 WORKDIR /usr/src/app
 COPY package*.json ./
-RUN npm install
+RUN npm ci
 COPY . .
+RUN npm run build && npx tsup
 
-
-# Stage 2: Development Stage
-FROM base AS development
+# Development Stage
+FROM build AS development
 RUN npm install -g tsx knex @types/node
 ENV NODE_ENV=development
 EXPOSE 8000 9229
-COPY scripts/wait-for-it.sh /usr/src/app/scripts/wait-for-it.sh
+CMD ["./scripts/wait-for-it.sh", "postgres:5432", "--", "sh", "-c", "./scripts/docker/prepare.sh ./scripts/docker/start-app.sh"]
 
-CMD ["/usr/src/app/scripts/wait-for-it.sh", "postgres:5432", "--", "sh", "-c", "/usr/src/app/scripts/prepare.sh /usr/src/app/scripts/start-app.sh"]
-# Stage 3: Production Stage
-FROM base AS production
+# Production Stage
+FROM node:18-slim AS production
+WORKDIR /usr/src/app
 ENV NODE_ENV=production
-COPY . .
-RUN npm run build
-COPY scripts/wait-for-it.sh /usr/src/app/scripts/wait-for-it.sh
-RUN npx tsup
+COPY package*.json ./
+RUN npm ci --omit=dev
+COPY --from=build /usr/src/app/dist ./dist
+COPY scripts/wait-for-it.sh ./scripts/wait-for-it.sh
 EXPOSE 8000
+CMD ["./scripts/wait-for-it.sh", "postgres:5432", "--", "node", "dist/index.js"]
 
-CMD ["/usr/src/app/scripts/wait-for-it.sh", "postgres:5432", "--", "node", "dist/index.js"]

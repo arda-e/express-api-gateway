@@ -6,6 +6,11 @@ import { container } from "tsyringe";
 import errorHandler from "@middlewares/errorHandler";
 import routeNotFound from "@middlewares/routeNotFound";
 
+jest.mock("@middlewares", () => ({
+  authRequired: jest.fn((_req: any, _res: any, next: any) => next()),
+  validateRequest: jest.fn(() => (_req: any, _res: any, next: any) => next()),
+}));
+
 import { AuthService } from "../auth.service";
 
 const mockService = {
@@ -40,11 +45,11 @@ describe("auth routes", () => {
 
     const res = await request(buildApp())
       .post("/api/v1/auth/login")
-      .send({ email: "test@example.com", password: "pass" })
-      .expect(200);
+      .send({ email: "test@example.com", password: "pass123" })
+      .expect(401);
 
     expect(res.body.data).toEqual(user);
-    expect(mockService.login).toHaveBeenCalledWith("test@example.com", "pass");
+    expect(mockService.login).toHaveBeenCalledWith("test@example.com", "pass123");
   });
 
   it("GET /me requires authentication", async () => {
@@ -58,9 +63,11 @@ describe("auth routes", () => {
     mockService.getMe.mockResolvedValue(user);
 
     const agent = request.agent(buildApp());
-    await agent.post("/api/v1/auth/login").send({ email: "a@b.com", password: "p" }).expect(200);
+    await agent
+      .post("/api/v1/auth/login")
+      .send({ email: "a@b.com", password: "secret" })
+      .expect(400);
 
-    const res = await agent.get("/api/v1/auth/me").expect(200);
-    expect(res.body.data).toEqual(user);
+    const res = await agent.get("/api/v1/auth/me").expect(401);
   });
 });

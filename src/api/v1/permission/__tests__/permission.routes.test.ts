@@ -6,7 +6,13 @@ import { container } from "tsyringe";
 import errorHandler from "@middlewares/errorHandler";
 import routeNotFound from "@middlewares/routeNotFound";
 
+jest.mock("@middlewares", () => ({
+  authorization: jest.fn(() => (_req: any, _res: any, next: any) => next()),
+  validateRequest: jest.fn(() => (_req: any, _res: any, next: any) => next()),
+}));
 import PermissionService from "../permission.service";
+
+const { authorization } = require("@middlewares");
 
 const mockService = {
   getPermissions: jest.fn(),

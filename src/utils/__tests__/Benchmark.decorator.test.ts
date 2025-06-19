@@ -1,4 +1,6 @@
 import "reflect-metadata";
+import LoggerFactory from "@utils/Logger";
+
 import { createMethodWrapper } from "../decorators/Controller/method-wrapper";
 
 describe("Benchmark Decorator via Controller wrapper", () => {
@@ -18,14 +20,17 @@ describe("Benchmark Decorator via Controller wrapper", () => {
     const req = { method: "GET", path: "/" } as any;
     const res = buildRes();
     const next = jest.fn();
-    const logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+    const mockLogger = { info: jest.fn() } as any;
+    const loggerSpy = jest.spyOn(LoggerFactory, "getLogger").mockReturnValue(mockLogger);
 
     await wrapper(req, res as any, next);
 
     expect(original).toHaveBeenCalledTimes(1);
-    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('Method "testMethod" took'));
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      expect.stringContaining('Method "testMethod" took'),
+    );
 
-    logSpy.mockRestore();
+    loggerSpy.mockRestore();
   });
 
   it("does not log when benchmarking disabled", async () => {
@@ -34,12 +39,13 @@ describe("Benchmark Decorator via Controller wrapper", () => {
     const req = { method: "GET", path: "/" } as any;
     const res = buildRes();
     const next = jest.fn();
-    const logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+    const mockLogger = { info: jest.fn() } as any;
+    const loggerSpy = jest.spyOn(LoggerFactory, "getLogger").mockReturnValue(mockLogger);
 
     await wrapper(req, res as any, next);
 
-    expect(logSpy).not.toHaveBeenCalled();
+    expect(mockLogger.info).not.toHaveBeenCalled();
 
-    logSpy.mockRestore();
+    loggerSpy.mockRestore();
   });
 });
