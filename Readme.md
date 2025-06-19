@@ -158,8 +158,9 @@ docker-compose -f docker-compose.prod.yml --env-file .env.prod up --build
 
 ## API Documentation
 
-API documentation is available at:
-Feature folders in the src/api/v1 folder
+After starting the application, navigate to
+`http://localhost:8000/api-docs` to view the Swagger UI with the
+available endpoints.
 
 ## Development Guide
 
