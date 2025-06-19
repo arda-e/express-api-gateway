@@ -1,17 +1,17 @@
-import 'reflect-metadata';
-import dotenv from 'dotenv';
+import "reflect-metadata";
+import dotenvFlow from "dotenv-flow";
 
-import { startServer } from './server';
+import { startServer } from "./server";
 
-dotenv.config();
+dotenvFlow.config();
 
 (async () => {
-  console.log('Starting server...');
+  console.log("Starting server...");
   try {
     await startServer();
-    console.log('Server started successfully.');
+    console.log("Server started successfully.");
   } catch (error) {
-    console.error('Failed to start the server:', error);
+    console.error("Failed to start the server:", error);
     process.exit(1);
   }
 })();

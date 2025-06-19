@@ -2,6 +2,7 @@ import nodemailer from "nodemailer";
 import { injectable } from "tsyringe";
 import { verificationEmailTemplate } from "@api/v1/auth/emails/verificationEmail";
 import { resetPasswordEmailTemplate } from "@api/v1/auth/emails/resetPasswordEmail";
+import Config from "@config/config";
 
 import LoggerFactory from "./Logger";
 
@@ -12,9 +13,16 @@ export class MailService {
 
   constructor() {
     this.transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 587,
+      host: Config.app.mail.host,
+      port: Config.app.mail.port,
       secure: false,
+      auth:
+        Config.app.mail.user && Config.app.mail.pass
+          ? {
+              user: Config.app.mail.user,
+              pass: Config.app.mail.pass,
+            }
+          : undefined,
     });
   }
 
