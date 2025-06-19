@@ -1,5 +1,6 @@
 import { createClient, RedisClientType } from "redis";
 import { singleton } from "tsyringe";
+import Config from "@config/config";
 
 import LoggerFactory from "./Logger";
 
@@ -53,9 +54,11 @@ export class RedisManager {
    * @returns {Promise<void>} A Promise that resolves when the Redis client is successfully initialized.
    */
   private async initRedisClient(timeout: number = 5000, maxRetries: number = 5): Promise<void> {
+    const host = Config.app.session.redis.host || "redis";
+    const port = Config.app.session.redis.port || 6379;
+
     this.redisClient = createClient({
-      url: "redis://redis:6379",
-      //url: `redis://${Config.app.session.redis.host}:${Config.app.session.redis.port}`,
+      url: `redis://${host}:${port}`,
     });
     let attempts = 0;
 
