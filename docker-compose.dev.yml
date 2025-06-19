@@ -21,6 +21,25 @@ services:
       - redis
     networks:
       - express-gateway-network
+  worker:
+    container_name: worker
+    build:
+      context: ./
+      target: ${TARGET_STAGE:-development}
+      args:
+        NODE_ENV: ${NODE_ENV:-development}
+    command: npm run start:worker
+    volumes:
+      - .:/usr/src/app
+      - ./dist/client:/usr/src/app/dist/client
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - redis
+    networks:
+      - express-gateway-network
+
   db:
     container_name: postgres
     image: "postgres:alpine"
