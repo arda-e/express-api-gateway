@@ -107,4 +107,3 @@ export class AuthRepository extends KnexRepository<UserModel> {
     return result > 0;
   }
 }
-w;

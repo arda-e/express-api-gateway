@@ -17,7 +17,7 @@ services:
       - ./scripts/wait-for-it.sh:/wait-for-it.sh
     env_file:
       - .env
-    entrypoint: ./scripts/start-app.sh
+    entrypoint: ./scripts/docker/start-app.sh
     depends_on:
       - db
       - redis
@@ -35,7 +35,7 @@ services:
       - .:/usr/src/app
       - ./dist/client:/usr/src/app/dist/client
       - ./scripts/wait-for-it.sh:/wait-for-it.sh
-      - ./scripts/start-worker.sh:/start-worker.sh
+      - ./scripts/docker/start-worker.sh:/start-worker.sh
     env_file:
       - .env
     entrypoint: /start-worker.sh
@@ -95,7 +95,7 @@ services:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     volumes:
       - ./scripts/wait-for-it.sh:/wait-for-it.sh
-      - ./scripts/start-kibana.sh:/start-kibana.sh
+      - ./scripts/docker/start-kibana.sh:/start-kibana.sh
     entrypoint: /start-kibana.sh
     depends_on:
       - elasticsearch

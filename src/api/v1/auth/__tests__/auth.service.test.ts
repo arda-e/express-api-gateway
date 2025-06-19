@@ -14,7 +14,7 @@ const mockRepo = {
 };
 
 const mockTokenRepo = {
-  createToken: jest.fn(),
+  createToken: jest.fn().mockResolvedValue({ token: "t" }),
   findByToken: jest.fn(),
   deleteById: jest.fn(),
 };
@@ -40,7 +40,13 @@ describe("AuthService", () => {
       }
       return mockQueue;
     });
-    service = new AuthService(mockRepo as any, mockQueue as any);
+    const roleRepo = { findByField: jest.fn().mockResolvedValue({ id: "1" }) };
+    service = new AuthService(
+      mockRepo as any,
+      mockQueue as any,
+      mockTokenRepo as any,
+      roleRepo as any,
+    );
   });
 
   describe("login", () => {

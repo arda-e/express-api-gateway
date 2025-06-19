@@ -2,8 +2,9 @@ import { UserModel } from "@api/v1/auth/auth.model";
 import { BaseEntity, DomainEvent } from "@utils/domain";
 import { UserAction, UserState, userTransitions } from "@api/v1/auth/auth.states";
 import { Knex } from "knex";
-import { AuthRepository } from "@api/v1/auth/index";
 import { EventType } from "@utils/queue/EventTypes";
+
+import { AuthRepository } from "./auth.repository";
 
 export class UserEntity extends BaseEntity<UserState, UserAction> {
   private readonly _model: UserModel;
