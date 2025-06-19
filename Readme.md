@@ -109,10 +109,15 @@ npm install
 
 ## Environment Configuration
 
-Create environment files based on your requirements:
+This project uses **dotenv-flow** for environment configuration. Create the
+appropriate `.env` files depending on your needs:
 
-- `.env.dev` - Development environment
-- `.env.prod` - Production environment
+- `.env` - Default values shared across environments
+- `.env.development` - Development overrides
+- `.env.production` - Production overrides
+
+`dotenv-flow` automatically loads `.env`, `.env.local`, and files matching
+`NODE_ENV` such as `.env.development`. Set `NODE_ENV` to switch environments.
 
 Example configuration:
 
@@ -147,7 +152,7 @@ LOG_FILE_PATH=logs/app-%DATE%.log
 For building the development environment:
 
 ```bash
-docker-compose -f docker-compose.dev.yml --env-file .env.dev up --build
+docker-compose -f docker-compose.dev.yml up --build
 ```
 
 ### Production
@@ -155,7 +160,7 @@ docker-compose -f docker-compose.dev.yml --env-file .env.dev up --build
 For building the production environment:
 
 ```bash
-docker-compose -f docker-compose.prod.yml --env-file .env.prod up --build
+docker-compose -f docker-compose.prod.yml up --build
 ```
 
 ## API Documentation

@@ -1,6 +1,6 @@
-const dotenv = require("dotenv");
-// TODO: Use library like config
-dotenv.config();
+import dotenvFlow from "dotenv-flow";
+
+dotenvFlow.config();
 
 const config = {
   db: {
@@ -41,8 +41,5 @@ const config = {
     },
   },
 };
-
-console.log("Redis Host:", process.env.REDIS_HOST);
-console.log("Redis Port:", process.env.REDIS_PORT);
 
 export default config;
