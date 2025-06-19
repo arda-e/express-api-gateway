@@ -22,5 +22,6 @@ import { AppError } from "@utils/errors/AppError";
 export class AuthenticationError extends AppError {
   constructor(message: string = "Authentication failed") {
     super(message, 401, "AUTHENTICATION_ERROR");
+    Object.setPrototypeOf(this, new.target.prototype);
   }
 }
