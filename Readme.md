@@ -41,6 +41,7 @@ A robust, scalable API Gateway built with Express.js and TypeScript implementing
   - Advanced logging with Winston
   - Log rotation and management
   - Error handling and reporting
+  - Optional Elasticsearch + Kibana integration for analytics
 
 - **Dependency Injection**:
   - Inversion of Control (IoC) container
@@ -141,6 +142,10 @@ REDIS_PORT=6379
 # Logging
 LOG_LEVEL=info
 LOG_FILE_PATH=logs/app-%DATE%.log
+# Analytics
+ANALYTICS_ENABLED=true
+ANALYTICS_URL=http://elasticsearch:9200
+ANALYTICS_LOG_LEVEL=info
 ```
 
 `REDIS_HOST` and `REDIS_PORT` control the address of the Redis instance used for session storage. If these variables are not set, the gateway defaults to `redis` and `6379`.
@@ -162,6 +167,13 @@ For building the production environment:
 ```bash
 docker-compose -f docker-compose.prod.yml up --build
 ```
+
+### Analytics Dashboard
+
+The Docker Compose files include `elasticsearch` and `kibana` services.
+After starting the stack, navigate to `http://localhost:5601` to access Kibana
+and explore collected logs. Ensure `ANALYTICS_ENABLED` is set to `true` so logs
+are forwarded to the Elasticsearch service.
 
 ## API Documentation
 
@@ -192,6 +204,11 @@ The application uses Winston for logging. Logs are stored in daily-rotated files
 
 - Use `LoggerFactory.getLogger()` to get a logger instance.
 - Log levels: error, warn, info, debug
+
+If `ANALYTICS_ENABLED` is set to `true`, logs are also forwarded to the
+analytics stack via the URL configured in `ANALYTICS_URL`. When running the
+provided Docker compose files, Kibana is available at `http://localhost:5601`
+for exploring collected logs.
 
 ### Error Handling
 

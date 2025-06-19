@@ -40,6 +40,11 @@ const config = {
       pass: process.env.SMTP_PASS || "",
     },
   },
+  analytics: {
+    enabled: process.env.ANALYTICS_ENABLED === "true",
+    url: process.env.ANALYTICS_URL || "",
+    logLevel: process.env.ANALYTICS_LOG_LEVEL || "info",
+  },
 };
 
 export default config;
