@@ -1,4 +1,4 @@
-import { Configuration, OpenAIApi } from "openai";
+import OpenAI from "openai";
 import fs from "fs";
 
 interface User {
@@ -9,7 +9,7 @@ interface User {
 const total = parseInt(process.env.USER_COUNT || "100000", 10);
 const apiKey = process.env.OPENAI_API_KEY || "";
 
-const openai = new OpenAIApi(new Configuration({ apiKey }));
+const openai = new OpenAI({ apiKey });
 
 function extractJson(content: string): string {
   const start = content.indexOf("[");
@@ -26,7 +26,7 @@ async function generateBatch(count: number): Promise<User[]> {
     `with fields “username” and “email”. ` +
     `Return only the JSON.`;
 
-  const response = await openai.createChatCompletion({
+  const response = await openai.chat.completions.create({
     model: "gpt-3.5-turbo",
     messages: [
       { role: "system", content: "You generate test user data" },
@@ -34,7 +34,7 @@ async function generateBatch(count: number): Promise<User[]> {
     ],
   });
 
-  const raw = response.data.choices[0].message?.content ?? "";
+  const raw = response.choices[0].message?.content ?? "";
   const json = extractJson(raw);
   return JSON.parse(json) as User[];
 }
