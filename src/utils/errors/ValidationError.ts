@@ -22,5 +22,6 @@ import { AppError } from "@utils/errors/AppError";
 export class ValidationError extends AppError {
   constructor(message: string = "Validation failed") {
     super(message, 400, "VALIDATION_ERROR");
+    Object.setPrototypeOf(this, new.target.prototype);
   }
 }

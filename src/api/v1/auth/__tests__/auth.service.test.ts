@@ -1,6 +1,8 @@
 import "reflect-metadata";
 import { AuthenticationError, UniqueConstraintError } from "@utils/errors";
 import { EventQueue } from "@utils/queue/EventQueue";
+import { container } from "tsyringe";
+import DatabaseManager from "@db/db.manager";
 
 import { UserModel } from "../auth.model";
 import { AuthService } from "../auth.service";
@@ -20,6 +22,18 @@ describe("AuthService", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.spyOn(container, "resolve").mockImplementation((token: any) => {
+      if (token === DatabaseManager) {
+        return {
+          getDatabase: () => ({
+            getInstance: () => ({
+              transaction: async (cb: any) => cb({ commit: jest.fn(), rollback: jest.fn() }),
+            }),
+          }),
+        };
+      }
+      return mockQueue;
+    });
     service = new AuthService(mockRepo as any, mockQueue as any);
   });
 

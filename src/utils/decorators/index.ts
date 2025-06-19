@@ -5,3 +5,4 @@ export { Route } from "./Route";
 export { Benchmark } from "./Benchmark";
 export { Logger } from "./Logger";
 export { InvalidateCache, Cache } from "./Cache";
+export { Paginated } from "./Paginated";
