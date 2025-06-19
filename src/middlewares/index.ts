@@ -4,3 +4,4 @@ export { default as routeNotFound } from "./routeNotFound";
 export { default as validateRequest } from "./validator";
 export { authorization } from "./authorization";
 export { default as authRequired } from "./authRequired";
+export { default as adminOnly } from "./adminOnly";

@@ -1,6 +1,5 @@
 import dotenvFlow from "dotenv-flow";
 
-// Load environment variables from `.env*` files using dotenv-flow
 dotenvFlow.config();
 
 const config = {
@@ -33,6 +32,12 @@ const config = {
         password: process.env.APP_SESSION_REDIS_PASSWORD || "",
         prefix: process.env.APP_SESSION_REDIS_PREFIX || "session:",
       },
+    },
+    mail: {
+      host: process.env.SMTP_HOST || "smtp.gmail.com",
+      port: process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT, 10) : 587,
+      user: process.env.SMTP_USER || "",
+      pass: process.env.SMTP_PASS || "",
     },
   },
 };

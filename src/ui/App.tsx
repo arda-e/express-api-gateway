@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { AuthProvider, useAuth } from "./components/AuthContext";
 import Login from "./components/Login";
+import Health from "./components/Health";
 
 interface QueueItem {
   id: string;
@@ -8,7 +9,11 @@ interface QueueItem {
   status: string;
 }
 
-const QueueDashboard = () => {
+interface QueueDashboardProps {
+  isAdmin: boolean;
+}
+
+const QueueDashboard = ({ isAdmin }: QueueDashboardProps) => {
   // State for a message shown in the UI and for the queue items.
   const [msg, setMsg] = useState("Waiting for WebSocket...");
   const [queueItems, setQueueItems] = useState<QueueItem[]>([]);
@@ -110,20 +115,22 @@ const QueueDashboard = () => {
               <li>No jobs found.</li>
             )}
           </ul>
+          {isAdmin && <Health />}
         </div>
       </div>
     </div>
   );
 };
 
-const App = () => {
-  const { isAuthenticated } = useAuth();
-
-  return (
-    <AuthProvider>
-      {isAuthenticated ? <QueueDashboard /> : <Login />}
-    </AuthProvider>
-  );
+const AppContent = () => {
+  const { isAuthenticated, isAdmin } = useAuth();
+  return isAuthenticated ? <QueueDashboard isAdmin={isAdmin} /> : <Login />;
 };
+
+const App = () => (
+  <AuthProvider>
+    <AppContent />
+  </AuthProvider>
+);
 
 export default App;
