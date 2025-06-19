@@ -22,5 +22,6 @@ import { AppError } from "@utils/errors/AppError";
 export class ResourceDoesNotExistError extends AppError {
   constructor(message: string = "Resource not found") {
     super(message, 404, "RESOURCE_NOT_FOUND");
+    Object.setPrototypeOf(this, new.target.prototype);
   }
 }

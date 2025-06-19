@@ -1,5 +1,7 @@
 import { injectable, inject } from "tsyringe";
 import { ResourceAlreadyExistsError, ResourceDoesNotExistError } from "@utils/errors";
+import { Paginated } from "@utils/decorators";
+import { PaginationResult } from "@utils/pagination";
 
 import Permission from "./permission.model";
 import PermissionRepository from "./permission.repository";
@@ -8,12 +10,16 @@ import PermissionRepository from "./permission.repository";
 class PermissionService {
   constructor(@inject(PermissionRepository) private permissionRepository: PermissionRepository) {}
 
+  @Paginated()
   public async getPermissions(
-    page: number,
-    limit: number,
-  ): Promise<{ permissions: Permission[]; total: number }> {
-    const { data, total } = await this.permissionRepository.findAllPaginated(page, limit);
-    return { permissions: data, total };
+    page?: number,
+    limit?: number,
+  ): Promise<PaginationResult<Permission>> {
+    const { data, total } = await this.permissionRepository.findAllPaginated(
+      page ?? 1,
+      limit ?? 10,
+    );
+    return { data, total } as unknown as PaginationResult<Permission>;
   }
 
   public async getPermission(permissionId: string): Promise<Permission | null> {

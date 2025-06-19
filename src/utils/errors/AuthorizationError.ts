@@ -22,5 +22,6 @@ import { AppError } from "@utils/errors/AppError";
 export class AuthorizationError extends AppError {
   constructor(message: string = "Access denied") {
     super(message, 403, "AUTHORIZATION_ERROR");
+    Object.setPrototypeOf(this, new.target.prototype);
   }
 }

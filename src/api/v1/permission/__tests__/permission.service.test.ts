@@ -61,4 +61,25 @@ describe("PermissionService", () => {
       expect(mockRepo.create).toHaveBeenCalledWith(perm);
     });
   });
+
+  describe("getPermissions", () => {
+    it("returns paginated result with defaults", async () => {
+      mockRepo.findAllPaginated.mockResolvedValue({ data: [], total: 0 });
+
+      const result = await service.getPermissions();
+
+      expect(result).toEqual({ data: [], total: 0, page: 1, limit: 10 });
+      expect(mockRepo.findAllPaginated).toHaveBeenCalledWith(1, 10);
+    });
+
+    it("uses provided page and limit", async () => {
+      mockRepo.findAllPaginated.mockResolvedValue({ data: [], total: 0 });
+
+      const result = await service.getPermissions(2, 5);
+
+      expect(result.page).toBe(2);
+      expect(result.limit).toBe(5);
+      expect(mockRepo.findAllPaginated).toHaveBeenCalledWith(2, 5);
+    });
+  });
 });
