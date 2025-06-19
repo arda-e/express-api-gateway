@@ -12,6 +12,16 @@ const authController = container.resolve(AuthController);
 // Public routes (no authentication required)
 router.post("/login", validateRequest(DTO.LoginUserRequestDTO), authController.login);
 router.post("/register", validateRequest(DTO.RegisterUserRequestDTO), authController.register);
+router.post(
+  "/verify-email",
+  validateRequest(DTO.VerifyEmailRequestDTO),
+  authController.verifyEmail,
+);
+router.post(
+  "/reset-password",
+  validateRequest(DTO.ResetPasswordRequestDTO),
+  authController.resetPassword,
+);
 
 // Protected routes (authentication required)
 router.post("/logout", authRequired, authController.logout);

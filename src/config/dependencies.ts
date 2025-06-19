@@ -6,6 +6,7 @@ import DatabaseFactory from "@db/db.manager";
 import LoggerFactory from "@utils/Logger";
 import DatabaseManager from "@db/db.manager";
 import { AuthRepository, AuthService } from "@api/v1/auth";
+import { VerificationTokenRepository } from "@api/v1/auth";
 import { EventQueue } from "@utils/queue/EventQueue";
 import { DeadLetterQueue } from "@utils/queue/DeadLetterQueue";
 import QueueService from "@api/v1/queue/queue.service";
@@ -65,6 +66,7 @@ export const initializeAppDependencies = (): void => {
       useClass: QueueController,
     });
     container.resolve(DatabaseManager);
+    container.resolve(VerificationTokenRepository);
     container.resolve(AuthRepository);
     container.resolve(AuthService);
     logger.info("Application dependencies initialized successfully.");
