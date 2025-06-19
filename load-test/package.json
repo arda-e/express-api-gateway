@@ -3,15 +3,9 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "build": "tsc",
-    "check": "node dist/health-check.js"
+    "check": "node health-check.js"
   },
   "dependencies": {
     "openai": "^4.0.0"
-  },
-  "devDependencies": {
-    "typescript": "^5.5.4",
-    "@types/k6": "^1.0.2",
-    "@types/node": "^20.11.18"
   }
 }

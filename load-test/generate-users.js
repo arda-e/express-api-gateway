@@ -1,17 +1,12 @@
 import OpenAI from "openai";
 import fs from "fs";
 
-interface User {
-  username: string;
-  email: string;
-}
-
-const total = parseInt(process.env.USER_COUNT || "100000", 10);
+const total = parseInt(process.env.USER_COUNT || "10000", 10);
 const apiKey = process.env.OPENAI_API_KEY || "";
 
 const openai = new OpenAI({ apiKey });
 
-function extractJson(content: string): string {
+function extractJson(content) {
   const start = content.indexOf("[");
   const end = content.lastIndexOf("]");
   if (start === -1 || end === -1) {
@@ -20,7 +15,7 @@ function extractJson(content: string): string {
   return content.slice(start, end + 1);
 }
 
-async function generateBatch(count: number): Promise<User[]> {
+async function generateBatch(count) {
   const prompt =
     `Generate ${count} unique user objects in valid JSON array ` +
     `with fields “username” and “email”. ` +
@@ -36,11 +31,11 @@ async function generateBatch(count: number): Promise<User[]> {
 
   const raw = response.choices[0].message?.content ?? "";
   const json = extractJson(raw);
-  return JSON.parse(json) as User[];
+  return JSON.parse(json);
 }
 
 async function main() {
-  const users: User[] = [];
+  const users = [];
   while (users.length < total) {
     const remaining = total - users.length;
     const batchSize = remaining > 100 ? 100 : remaining;

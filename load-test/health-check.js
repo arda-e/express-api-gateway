@@ -1,6 +1,6 @@
 import http from "node:http";
 
-function check(url: string): Promise<void> {
+function check(url) {
   return new Promise((resolve, reject) => {
     const req = http.get(url, (res) => {
       if (res.statusCode && res.statusCode >= 200 && res.statusCode < 400) {

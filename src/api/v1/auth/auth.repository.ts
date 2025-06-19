@@ -9,7 +9,7 @@ import { Role, RoleUser } from "@api/v1/role/models";
 import { UserModel } from "./auth.model";
 
 @injectable()
-class AuthRepository extends KnexRepository<UserModel> {
+export class AuthRepository extends KnexRepository<UserModel> {
   constructor(@inject(DatabaseManager) protected databaseManager: DatabaseManager) {
     super(databaseManager);
   }
@@ -107,5 +107,4 @@ class AuthRepository extends KnexRepository<UserModel> {
     return result > 0;
   }
 }
-
-export default AuthRepository;
+w;

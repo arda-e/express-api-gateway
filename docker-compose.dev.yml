@@ -14,13 +14,16 @@ services:
     volumes:
       - .:/usr/src/app
       - ./dist/client:/usr/src/app/dist/client
+      - ./scripts/wait-for-it.sh:/wait-for-it.sh
     env_file:
       - .env
+    entrypoint: ./scripts/start-app.sh
     depends_on:
       - db
       - redis
     networks:
       - express-gateway-network
+
   worker:
     container_name: worker
     build:
@@ -28,13 +31,16 @@ services:
       target: ${TARGET_STAGE:-development}
       args:
         NODE_ENV: ${NODE_ENV:-development}
-    command: npm run start:worker
     volumes:
       - .:/usr/src/app
       - ./dist/client:/usr/src/app/dist/client
+      - ./scripts/wait-for-it.sh:/wait-for-it.sh
+      - ./scripts/start-worker.sh:/start-worker.sh
     env_file:
       - .env
+    entrypoint: /start-worker.sh
     depends_on:
+      - express
       - db
       - redis
     networks:
@@ -49,6 +55,7 @@ services:
       - .env
     networks:
       - express-gateway-network
+
   redis:
     container_name: redis
     image: "redis:alpine"
@@ -58,6 +65,7 @@ services:
       - .env
     networks:
       - express-gateway-network
+
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.17.6
     container_name: elasticsearch
@@ -67,7 +75,6 @@ services:
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
       - http.cors.enabled=true
-      - "http.cors.allow-origin=*" # adjust this for prod
     ulimits:
       memlock:
         soft: -1
@@ -86,6 +93,10 @@ services:
       - "5601:5601"
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    volumes:
+      - ./scripts/wait-for-it.sh:/wait-for-it.sh
+      - ./scripts/start-kibana.sh:/start-kibana.sh
+    entrypoint: /start-kibana.sh
     depends_on:
       - elasticsearch
     networks:

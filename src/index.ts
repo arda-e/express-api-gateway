@@ -1,11 +1,13 @@
 import "reflect-metadata";
 import dotenvFlow from "dotenv-flow";
 import LoggerFactory from "@utils/Logger";
+import * as path from "node:path";
 
 import { startServer } from "./server";
 
-dotenvFlow.config();
-
+dotenvFlow.config({
+  path: path.resolve(__dirname, "../../"),
+});
 (async () => {
   const logger = LoggerFactory.getLogger();
   logger.info("Starting server...");

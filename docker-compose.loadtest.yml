@@ -1,8 +1,31 @@
-version: "3.9"
-
 services:
+  generate:
+    image: node:18
+    volumes:
+      - ./load-test:/scripts
+    working_dir: /scripts
+    entrypoint: sh
+    command: >
+      -c "./scripts/wait-for-it.sh express:8000 --timeout=60 --strict -- ./scripts/run.sh"
+    networks:
+      - express-gateway-network
+
   loadtest:
-    build:
-      context: ./load-test
+    image: grafana/k6
+    depends_on:
+      generate:
+        condition: service_completed_successfully
+    volumes:
+      - ./load-test:/scripts
+    working_dir: /scripts
+    entrypoint: sh
+    command: >
+      -c "./scripts/wait-for-it.sh kibana:5601 --timeout=60 --strict -- 
+      ./scripts/entrypoint.sh"
     env_file:
       - .env.loadtest
+    networks:
+      - express-gateway-network
+networks:
+  express-gateway-network:
+    external: true

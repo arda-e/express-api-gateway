@@ -1,12 +1,11 @@
 import http from "k6/http";
 import { check } from "k6";
 
-interface User {
-  username: string;
-  email: string;
+if (!__ENV.TARGET_URL) {
+  throw new Error("❌ TARGET_URL is not defined in environment variables");
 }
 
-const users: User[] = require("./users.json");
+const users = JSON.parse(open("./users.json"));
 
 export const options = {
   vus: 50,
@@ -21,7 +20,14 @@ export default function () {
     password: "Password123!",
   });
 
-  const params = { headers: { "Content-Type": "application/json" } };
+  const params = {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  };
+
   const res = http.post(`${__ENV.TARGET_URL}/api/v1/auth/register`, payload, params);
-  check(res, { "status 201": (r) => r.status === 201 });
+  check(res, {
+    "status 201": (r) => r.status === 201,
+  });
 }

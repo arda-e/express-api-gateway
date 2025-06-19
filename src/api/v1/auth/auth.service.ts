@@ -16,6 +16,8 @@ import { EventType } from "@utils/queue/EventTypes";
 import Config from "@config/config";
 import LoggerFactory from "@utils/Logger";
 import { RoleRepository } from "@api/v1/role/repositories";
+import { isArray } from "class-validator";
+import { Role } from "@api/v1/role";
 
 import { UserModel } from "./auth.model";
 import * as DTO from "./auth.dtos";
@@ -46,20 +48,15 @@ export class AuthService {
     const existingUser = await this.authRepository.findByEmail(email, trx);
     if (existingUser) throw new UniqueConstraintError("User already exists");
 
-    const [defaultRole] = await this.roleRepository.findByField(
+    const defaultRole = await this.roleRepository.findByField(
       "name",
       Config.app.defaultRoleName,
       trx,
     );
     if (!defaultRole) throw new Error("Default role not found");
 
-    const newUser = await this.authRepository.createUser(
-      username,
-      email,
-      password,
-      [defaultRole.id],
-      trx!,
-    );
+    const id = isArray(defaultRole) ? defaultRole[0].id : (defaultRole as Role).id;
+    const newUser = await this.authRepository.createUser(username, email, password, [id], trx!);
 
     const entity = await UserEntity.create(newUser)
       .transition(UserAction.REGISTER)
