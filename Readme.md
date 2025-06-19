@@ -138,6 +138,8 @@ LOG_LEVEL=info
 LOG_FILE_PATH=logs/app-%DATE%.log
 ```
 
+`REDIS_HOST` and `REDIS_PORT` control the address of the Redis instance used for session storage. If these variables are not set, the gateway defaults to `redis` and `6379`.
+
 ## Running the Application
 
 ### Development
