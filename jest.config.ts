@@ -9,6 +9,7 @@ module.exports = {
     "^@config/(.*)$": "<rootDir>/src/config/$1",
     "^@db/(.*)$": "<rootDir>/src/db/$1",
     "^@middlewares/(.*)$": "<rootDir>/src/middlewares/$1",
+    "^@middlewares$": "<rootDir>/src/middlewares",
   },
   globals: {
     "ts-jest": {
