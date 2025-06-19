@@ -41,7 +41,7 @@ A robust, scalable API Gateway built with Express.js and TypeScript implementing
   - Advanced logging with Winston
   - Log rotation and management
   - Error handling and reporting
-  - Optional ELK stack integration for analytics
+  - Elasticsearch + Kibana integration for analytics
 
 - **Dependency Injection**:
   - Inversion of Control (IoC) container
@@ -144,7 +144,7 @@ LOG_LEVEL=info
 LOG_FILE_PATH=logs/app-%DATE%.log
 # Analytics
 ANALYTICS_ENABLED=true
-ANALYTICS_URL=http://analytics:5044
+ANALYTICS_URL=http://elasticsearch:9200
 ANALYTICS_LOG_LEVEL=info
 ```
 
@@ -170,9 +170,10 @@ docker-compose -f docker-compose.prod.yml up --build
 
 ### Analytics Dashboard
 
-After the services start, navigate to `http://localhost:5601` to access Kibana
-and explore the collected logs. Ensure `ANALYTICS_ENABLED` is set to `true` so
-logs are forwarded to the analytics container defined in the compose files.
+The Docker Compose files include `elasticsearch` and `kibana` services.
+After starting the stack, navigate to `http://localhost:5601` to access Kibana
+and explore collected logs. Ensure `ANALYTICS_ENABLED` is set to `true` so logs
+are forwarded to the Elasticsearch service.
 
 ## API Documentation
 
