@@ -1,4 +1,5 @@
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 import { inject, injectable } from "tsyringe";
 import { Knex } from "knex";
 import {
@@ -16,12 +17,16 @@ import { EventType } from "@utils/queue/EventTypes";
 import { UserModel } from "./auth.model";
 import * as DTO from "./auth.dtos";
 import AuthRepository from "./auth.repository";
+import VerificationTokenRepository from "./verification-token.repository";
+import { TokenType } from "./verification-token.model";
 
 @injectable()
 export class AuthService {
   constructor(
     @inject(AuthRepository) private authRepository: AuthRepository,
     @inject(EventQueue) private eventQueue: EventQueue,
+    @inject(VerificationTokenRepository)
+    private tokenRepository: VerificationTokenRepository,
   ) {}
 
   @ExceptionHandler("Failed to register user")
@@ -47,10 +52,26 @@ export class AuthService {
       .transition(UserAction.REGISTER)
       .persist(this.authRepository, trx!);
 
+    const verificationToken = await this.tokenRepository.createToken(
+      entity.id,
+      crypto.randomUUID(),
+      TokenType.EmailVerification,
+      new Date(Date.now() + 1000 * 60 * 60 * 24),
+      trx,
+    );
+
     await this.eventQueue.dispatchMany([
       {
         type: EventType.UserRegistered,
         payload: { userId: entity.id, email: entity.model.email },
+      },
+      {
+        type: EventType.EmailVerification,
+        payload: {
+          userId: entity.id,
+          email: entity.model.email,
+          token: verificationToken.token,
+        },
       },
     ]);
     return entity.toModel();
@@ -133,5 +154,47 @@ export class AuthService {
       console.error("Error validating password:", error);
       throw new ValidationError("Password validation failed");
     }
+  }
+
+  @ExceptionHandler("Failed to verify email")
+  @Transaction()
+  async verifyEmail(token: string, trx?: Knex.Transaction): Promise<UserModel> {
+    const record = await this.tokenRepository.findByToken(token, trx);
+    if (!record || record.type !== TokenType.EmailVerification || record.expiresAt < new Date()) {
+      throw new ValidationError("Invalid or expired token");
+    }
+
+    const user = await this.authRepository.findById(record.userId, trx);
+    if (!user) throw new ResourceDoesNotExistError("User not found");
+
+    user.emailVerified = true;
+
+    const entity = UserEntity.create(user).transition(UserAction.CONFIRM_EMAIL);
+    await entity.persist(this.authRepository, trx!);
+    await this.tokenRepository.deleteById(record.id, trx);
+    return entity.toModel();
+  }
+
+  @ExceptionHandler("Failed to reset password")
+  @Transaction()
+  async resetPassword(
+    token: string,
+    newPassword: string,
+    trx?: Knex.Transaction,
+  ): Promise<UserModel> {
+    const record = await this.tokenRepository.findByToken(token, trx);
+    if (!record || record.type !== TokenType.PasswordReset || record.expiresAt < new Date()) {
+      throw new ValidationError("Invalid or expired token");
+    }
+
+    const user = await this.authRepository.findById(record.userId, trx);
+    if (!user) throw new ResourceDoesNotExistError("User not found");
+
+    const hashed = await bcrypt.hash(newPassword, 10);
+    const entity = UserEntity.create(user).transition(UserAction.RESET_PASSWORD);
+    entity.model.password = hashed;
+    await entity.persist(this.authRepository, trx!);
+    await this.tokenRepository.deleteById(record.id, trx);
+    return entity.toModel();
   }
 }

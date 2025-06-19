@@ -9,6 +9,8 @@ import {
   EventType,
   PermissionUpdatedPayload,
   UserRegisteredPayload,
+  EmailVerificationPayload,
+  PasswordResetPayload,
 } from "./EventTypes";
 import { DeadLetterQueue } from "./DeadLetterQueue";
 
@@ -28,6 +30,14 @@ const handlers: {
     const { userId, permissionId, changedBy } = job.data;
     // TODO: Implement permission updated email
     // await mailService.sendPermissionUpdatedEmail(userId, permissionId, changedBy);
+  },
+  [EventType.EmailVerification]: async (job: Job<EmailVerificationPayload, any, EventType>) => {
+    const { email, token } = job.data;
+    await mailService.sendVerificationEmail(email, token);
+  },
+  [EventType.PasswordReset]: async (job: Job<PasswordResetPayload, any, EventType>) => {
+    const { email, token } = job.data;
+    await mailService.sendPasswordResetEmail(email, token);
   },
 };
 

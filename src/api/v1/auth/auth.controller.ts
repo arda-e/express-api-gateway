@@ -347,6 +347,32 @@ export class AuthController {
     await this.authService.changePassword(userId, newPassword);
     return ApiResponse.success(null, "Password changed successfully");
   }
+
+  @Route()
+  @Benchmark()
+  @Logger()
+  public async verifyEmail(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<ApiResponse<UserModel>> {
+    const { token } = req.body as DTO.VerifyEmailRequestDTO;
+    const user = await this.authService.verifyEmail(token);
+    return ApiResponse.success(user, "Email verified");
+  }
+
+  @Route()
+  @Benchmark()
+  @Logger()
+  public async resetPassword(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<ApiResponse<UserModel>> {
+    const { token, password } = req.body as DTO.ResetPasswordRequestDTO;
+    const user = await this.authService.resetPassword(token, password);
+    return ApiResponse.success(user, "Password reset successfully");
+  }
 }
 
 export default container.resolve(AuthController);

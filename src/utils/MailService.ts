@@ -1,5 +1,7 @@
 import nodemailer from "nodemailer";
 import { injectable } from "tsyringe";
+import { verificationEmailTemplate } from "@api/v1/auth/emails/verificationEmail";
+import { resetPasswordEmailTemplate } from "@api/v1/auth/emails/resetPasswordEmail";
 import Config from "@config/config";
 
 import LoggerFactory from "./Logger";
@@ -37,6 +39,38 @@ export class MailService {
       this.logger.info(`📤 Email sent to ${to}: ${result.messageId}`);
     } catch (err) {
       this.logger.error(`❌ Failed to send email to ${to}:`, err);
+    }
+  }
+
+  async sendVerificationEmail(to: string, token: string) {
+    try {
+      const template = verificationEmailTemplate(token);
+      const result = await this.transporter.sendMail({
+        from: '"Gateway App" <no-reply@gateway.local>',
+        to,
+        subject: template.subject,
+        text: template.text,
+        html: template.html,
+      });
+      this.logger.info(`📤 Verification email sent to ${to}: ${result.messageId}`);
+    } catch (err) {
+      this.logger.error(`❌ Failed to send verification email to ${to}:`, err);
+    }
+  }
+
+  async sendPasswordResetEmail(to: string, token: string) {
+    try {
+      const template = resetPasswordEmailTemplate(token);
+      const result = await this.transporter.sendMail({
+        from: '"Gateway App" <no-reply@gateway.local>',
+        to,
+        subject: template.subject,
+        text: template.text,
+        html: template.html,
+      });
+      this.logger.info(`📤 Password reset email sent to ${to}: ${result.messageId}`);
+    } catch (err) {
+      this.logger.error(`❌ Failed to send password reset email to ${to}:`, err);
     }
   }
 }

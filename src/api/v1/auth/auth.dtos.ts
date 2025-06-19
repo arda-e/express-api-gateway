@@ -150,3 +150,13 @@ export class VerifyEmailRequestDTO {
   @IsString()
   token: string;
 }
+
+// TODO: Add swagger docs
+export class ResetPasswordRequestDTO {
+  @IsString()
+  token: string;
+
+  @IsString()
+  @Length(6, undefined, { message: "Password must be at least 6 characters long" })
+  password: string;
+}
