@@ -15,22 +15,34 @@ class LoggerFactory {
    * @private
    * */
   private static createAsyncLogger(): Logger {
+    const transportList = [
+      new transports.Console({
+        handleExceptions: true,
+      }),
+      new transports.DailyRotateFile({
+        filename: process.env.LOG_FILE_PATH || "app-%DATE%.log",
+        datePattern: "YYYY-MM-DD",
+        zippedArchive: true,
+        maxSize: "20m",
+        maxFiles: "14d",
+        handleExceptions: true,
+      }),
+    ];
+
+    if (process.env.ANALYTICS_ENABLED === "true" && process.env.ANALYTICS_URL) {
+      transportList.push(
+        new transports.Http({
+          level: process.env.ANALYTICS_LOG_LEVEL || "info",
+          url: process.env.ANALYTICS_URL,
+          handleExceptions: true,
+        }),
+      );
+    }
+
     return createLogger({
       level: process.env.LOG_LEVEL || "info",
       format: format.combine(format.timestamp(), format.json()),
-      transports: [
-        new transports.Console({
-          handleExceptions: true,
-        }),
-        new transports.DailyRotateFile({
-          filename: process.env.LOG_FILE_PATH || "app-%DATE%.log",
-          datePattern: "YYYY-MM-DD",
-          zippedArchive: true,
-          maxSize: "20m",
-          maxFiles: "14d",
-          handleExceptions: true,
-        }),
-      ],
+      transports: transportList,
     });
   }
 
