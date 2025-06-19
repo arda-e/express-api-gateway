@@ -1,12 +1,11 @@
-import type { Knex } from 'knex';
+import type { Knex } from "knex";
+import dotenvFlow from "dotenv-flow";
 
-const dotenv = require('dotenv');
-
-dotenv.config();
+dotenvFlow.config();
 
 const config: { [key: string]: Knex.Config } = {
   development: {
-    client: 'pg',
+    client: "pg",
     connection: {
       host: process.env.POSTGRES_HOST,
       user: process.env.POSTGRES_USER,
@@ -14,16 +13,16 @@ const config: { [key: string]: Knex.Config } = {
       database: process.env.POSTGRES_DB,
     },
     migrations: {
-      directory: '../migrations',
-      extension: 'ts',
+      directory: "../migrations",
+      extension: "ts",
     },
     seeds: {
-      directory: '../seeds',
-      extension: 'ts',
+      directory: "../seeds",
+      extension: "ts",
     },
   },
   production: {
-    client: 'pg',
+    client: "pg",
     connection: {
       host: process.env.POSTGRES_HOST,
       user: process.env.POSTGRES_USER,
@@ -31,12 +30,12 @@ const config: { [key: string]: Knex.Config } = {
       database: process.env.POSTGRES_DB,
     },
     migrations: {
-      directory: './dist/migrations',
-      extension: 'js',
+      directory: "./dist/migrations",
+      extension: "js",
     },
     seeds: {
-      directory: '../seeds',
-      extension: 'ts',
+      directory: "../seeds",
+      extension: "ts",
     },
   },
 };
