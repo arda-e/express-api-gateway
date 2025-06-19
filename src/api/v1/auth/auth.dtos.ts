@@ -64,7 +64,26 @@ export class RegisterUserRequestDTO {
   password: string;
 }
 
-// TODO: Add swagger docs
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     dto.ChangePasswordRequest:
+ *       type: object
+ *       required:
+ *         - newPassword
+ *         - password
+ *       properties:
+ *         newPassword:
+ *           type: string
+ *           minLength: 6
+ *           description: The new password for the user
+ *           example: StrongPass123
+ *         password:
+ *           type: string
+ *           description: The current password of the user
+ *           example: OldPass123
+ */
 export class ChangePasswordRequestDTO {
   @IsString()
   @Length(6, undefined, { message: "Password must be at least 6 characters long" })
@@ -74,7 +93,29 @@ export class ChangePasswordRequestDTO {
   password: string;
 }
 
-// TODO: Add swagger docs
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     dto.UpdateUserRequest:
+ *       type: object
+ *       required: []
+ *       properties:
+ *         username:
+ *           type: string
+ *           description: Updated username of the user
+ *           example: JohnUpdated
+ *         email:
+ *           type: string
+ *           format: email
+ *           description: Updated email address
+ *           example: new@example.com
+ *         password:
+ *           type: string
+ *           minLength: 6
+ *           description: Updated password for the user
+ *           example: NewPass123
+ */
 export class UpdateUserRequestDTO {
   @IsString()
   @IsOptional()
@@ -91,8 +132,31 @@ export class UpdateUserRequestDTO {
   password?: string;
 }
 
-// TODO: Add swagger docs
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     dto.VerifyEmailRequest:
+ *       type: object
+ *       required:
+ *         - token
+ *       properties:
+ *         token:
+ *           type: string
+ *           description: Verification token sent to the user's email
+ *           example: 123e4567-e89b-12d3-a456-426614174000
+ */
 export class VerifyEmailRequestDTO {
   @IsString()
   token: string;
+}
+
+// TODO: Add swagger docs
+export class ResetPasswordRequestDTO {
+  @IsString()
+  token: string;
+
+  @IsString()
+  @Length(6, undefined, { message: "Password must be at least 6 characters long" })
+  password: string;
 }

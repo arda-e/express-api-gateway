@@ -1,4 +1,5 @@
 import { container } from "tsyringe";
+import LoggerFactory from "@utils/Logger";
 
 import { CacheService } from "./CacheService";
 
@@ -16,6 +17,8 @@ export function Cache(options: CacheOptions = {}) {
     const originalMethod = descriptor.value;
     descriptor.value[CACHE_SYMBOL] = options;
 
+    const logger = LoggerFactory.getLogger();
+
     descriptor.value = async function (...args: any[]) {
       const cacheService = container.resolve<CacheService>(CacheService);
       const ttl = options.ttl ?? 5000;
@@ -25,7 +28,7 @@ export function Cache(options: CacheOptions = {}) {
         const cached = await cacheService.get(cacheKey);
         if (cached !== null && cached !== undefined) return cached;
       } catch (err) {
-        console.error("Cache get error:", err);
+        logger.error("Cache get error:", err);
       }
 
       const result = await originalMethod.apply(this, args);
@@ -33,7 +36,7 @@ export function Cache(options: CacheOptions = {}) {
       try {
         await cacheService.set(cacheKey, result, ttl);
       } catch (err) {
-        console.error("Cache set error:", err);
+        logger.error("Cache set error:", err);
       }
       return result;
     };

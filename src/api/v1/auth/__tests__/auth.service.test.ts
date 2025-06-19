@@ -13,6 +13,12 @@ const mockRepo = {
   update: jest.fn(),
 };
 
+const mockTokenRepo = {
+  createToken: jest.fn(),
+  findByToken: jest.fn(),
+  deleteById: jest.fn(),
+};
+
 const mockQueue = {
   dispatchMany: jest.fn(),
 };
@@ -71,7 +77,9 @@ describe("AuthService", () => {
     it("throws when email already exists", async () => {
       mockRepo.findByEmail.mockResolvedValue({ id: "1" });
 
-      await expect(service.register("u", "e", "p")).rejects.toBeInstanceOf(UniqueConstraintError);
+      await expect(service.register("u", "e", "p", {} as any)).rejects.toBeInstanceOf(
+        UniqueConstraintError,
+      );
     });
 
     it("creates user and dispatches event", async () => {
@@ -80,7 +88,7 @@ describe("AuthService", () => {
       mockRepo.createUser.mockResolvedValue(newUser);
       mockRepo.update.mockImplementation((_id, user) => Promise.resolve(user));
 
-      const result = await service.register("user", "e@x.com", "pass");
+      const result = await service.register("user", "e@x.com", "pass", {} as any);
 
       expect(result).toBeInstanceOf(UserModel);
       expect(mockRepo.createUser).toHaveBeenCalled();

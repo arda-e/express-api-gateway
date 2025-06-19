@@ -1,0 +1,8 @@
+version: "3.9"
+
+services:
+  loadtest:
+    build:
+      context: ./load-test
+    env_file:
+      - .env.loadtest
