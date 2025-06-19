@@ -1,5 +1,6 @@
 import * as Errors from "@utils/errors";
 import { StatusCodes } from "http-status-codes";
+import LoggerFactory from "@utils/Logger";
 
 import { PostgresErrorConfig } from "./config";
 import { DEFAULT_PASSTHROUGH_ERRORS } from "./passthrough-errors";
@@ -42,7 +43,8 @@ export function createHandleDatabaseError(config?: PostgresErrorConfig) {
 
   return function handleDatabaseError(error: any, customMessage?: string): never {
     if (shouldLog) {
-      console.error("[Database Error]", error);
+      const logger = LoggerFactory.getLogger();
+      logger.error("[Database Error]", error);
     }
     convertOrWrap(error, customMessage);
   };

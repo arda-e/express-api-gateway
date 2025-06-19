@@ -1,5 +1,7 @@
 node_modules
 .env
+.env.loadtest
 .idea
 dist
+load-test/users.json
 *.log

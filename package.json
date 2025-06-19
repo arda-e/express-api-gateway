@@ -17,7 +17,7 @@
   },
   "keywords": [],
   "author": "Meric Arda Eren",
-  "license": "ISC",
+  "license": "MIT",
   "description": "",
   "overrides": {
     "eslint": "^9.8.0"

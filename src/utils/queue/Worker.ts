@@ -3,6 +3,7 @@ import { Worker, Job } from "bullmq";
 import { MailService } from "@utils/MailService";
 import { container } from "tsyringe";
 import { RedisManager } from "@utils/RedisManager";
+import LoggerFactory from "@utils/Logger";
 
 import {
   EventPayloadMap,
@@ -16,6 +17,8 @@ import { DeadLetterQueue } from "./DeadLetterQueue";
 
 const redisManager = container.resolve(RedisManager);
 (async () => await redisManager.initialize())();
+
+const logger = LoggerFactory.getLogger();
 
 const mailService = container.resolve(MailService);
 
@@ -63,11 +66,11 @@ worker.on("failed", async (job, err) => {
   const maxAttempts = job.opts.attempts || 1;
 
   if (job.attemptsMade >= maxAttempts) {
-    console.warn(`💀 Moving job [${job.name}] to DLQ`);
+    logger.warn(`💀 Moving job [${job.name}] to DLQ`);
 
     await deadLetterQueue.pushFailedJob(job.name, job.data, err.message, job.id);
   } else {
-    console.warn(
+    logger.warn(
       `Job [${job.name}] failed but will retry (attempt ${job.attemptsMade + 1}/${maxAttempts})`,
     );
   }

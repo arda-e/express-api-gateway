@@ -90,6 +90,7 @@ services:
       - elasticsearch
     networks:
       - express-gateway-network
+
 networks:
   express-gateway-network:
     driver: bridge

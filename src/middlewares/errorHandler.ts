@@ -64,11 +64,11 @@ const errorHandler = (err: Error, req: Request, res: Response, next: NextFunctio
     return res.status(response.statusCode).json(response);
   } else if (res && typeof res.end === "function") {
     // Fallback: if not an Express response, end the response with the message
-    console.error("Response object does not support res.status(), falling back to res.end().");
+    logger.error("Response object does not support res.status(), falling back to res.end().");
     return res.end("Internal Server Error");
   } else {
     // Last resort - log that there's no valid response
-    console.error("No valid response object available to send error response.", err);
+    logger.error("No valid response object available to send error response.", err);
   }
 };
 

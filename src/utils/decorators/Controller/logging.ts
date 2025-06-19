@@ -1,15 +1,18 @@
 import { Request } from "express";
+import LoggerFactory from "@utils/Logger";
 
 /**
  * Logs the start of request processing
  */
 export function logRequestStart(req: Request): void {
-  console.log(`${new Date().toISOString()} | ${req.method} ${req.path} | Started`);
+  const logger = LoggerFactory.getLogger();
+  logger.info(`${req.method} ${req.path} | Started`);
 }
 
 /**
  * Logs the completion of request processing
  */
 export function logRequestEnd(req: Request): void {
-  console.log(`${new Date().toISOString()} | ${req.method} ${req.path} | Completed`);
+  const logger = LoggerFactory.getLogger();
+  logger.info(`${req.method} ${req.path} | Completed`);
 }
