@@ -21,7 +21,7 @@ import { Role } from "@api/v1/role";
 
 import { UserModel } from "./auth.model";
 import * as DTO from "./auth.dtos";
-import AuthRepository from "./auth.repository";
+import { AuthRepository } from "./auth.repository";
 import VerificationTokenRepository from "./verification-token.repository";
 import { TokenType } from "./verification-token.model";
 

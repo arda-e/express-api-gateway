@@ -9,7 +9,7 @@ import {
 } from "@utils/errors";
 import { ExceptionHandler } from "@utils/decorators";
 //** INTERNAL MODULES
-import { User, AuthRepository } from "@api/v1/auth";
+import { UserModel, AuthRepository } from "@api/v1/auth";
 import { Role, RolePermission } from "@api/v1/role/models";
 import {
   RolePermissionRepository,
@@ -110,7 +110,7 @@ class RoleService {
    * @throws {DatabaseError} If there is an error assigning the role to the user.
    */
   @ExceptionHandler("Failed to assign role to user")
-  async assignRoleToUser(userId: string, roleId: string): Promise<User | null> {
+  async assignRoleToUser(userId: string, roleId: string): Promise<UserModel | null> {
     await this.ensureRoleExists(roleId);
     const user = await this.authRepository.findById(userId);
     if (!user) {
@@ -164,7 +164,7 @@ class RoleService {
    * @throws {DatabaseError} If there is an error retrieving the role's users.
    */
   @ExceptionHandler("Failed to get users by role")
-  async getUsersByRole(roleId: string): Promise<User[]> {
+  async getUsersByRole(roleId: string): Promise<UserModel[]> {
     await this.ensureRoleExists(roleId);
     return this.userRoleRepository.getUsersByRole(roleId);
   }

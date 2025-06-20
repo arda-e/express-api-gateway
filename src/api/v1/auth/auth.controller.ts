@@ -113,7 +113,11 @@ export class AuthController {
   @Route()
   @Benchmark()
   @Logger()
-  public async login(req: Request, res: Response, next: NextFunction): Promise<ApiResponse<User>> {
+  public async login(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<ApiResponse<UserModel>> {
     const { email, password } = req.body as DTO.LoginUserRequestDTO;
     const user = await this.authService.login(email, password);
     req.session.userId = user.id;
@@ -208,7 +212,11 @@ export class AuthController {
   @Benchmark()
   @Logger()
   @Cache({ ttl: 600_000 })
-  public async getMe(req: Request, res: Response, next: NextFunction): Promise<ApiResponse<User>> {
+  public async getMe(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<ApiResponse<UserModel>> {
     const user = await this.authService.getMe(req.session.userId as string);
     return ApiResponse.success(user, "User retrieved successfully");
   }
@@ -254,7 +262,7 @@ export class AuthController {
     req: Request,
     res: Response,
     next: NextFunction,
-  ): Promise<ApiResponse<User>> {
+  ): Promise<ApiResponse<UserModel>> {
     const userId = req.session.userId;
 
     if (!userId) {

@@ -1,5 +1,5 @@
-import { IsUUID } from 'class-validator';
-import BaseModel from '@utils/Model';
+import { IsUUID } from "class-validator";
+import BaseModel from "@utils/Model";
 
 class RolePermission extends BaseModel {
   @IsUUID()
@@ -12,6 +12,16 @@ class RolePermission extends BaseModel {
     super(id);
     this.roleId = roleId;
     this.permissionId = permissionId;
+  }
+
+  public toRecord(): Record<string, any> {
+    return {
+      roleId: this.roleId,
+      permissionId: this.permissionId,
+      id: this.id,
+      createdAt: this.created_at,
+      updated_at: this.updated_at,
+    };
   }
 }
 

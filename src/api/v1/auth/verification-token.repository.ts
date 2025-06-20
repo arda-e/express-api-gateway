@@ -35,9 +35,10 @@ export class VerificationTokenRepository extends KnexRepository<VerificationToke
     return row ? VerificationTokenModel.fromRecord(row) : null;
   }
 
-  async deleteById(id: string, trx?: Knex.Transaction): Promise<void> {
+  async deleteById(id: string, trx?: Knex.Transaction): Promise<boolean> {
     const query = this.getQueryBuilder(trx);
-    await query.where({ id }).delete();
+    const deleted = await query.where({ id }).delete();
+    return deleted > 0;
   }
 }
 
