@@ -33,7 +33,7 @@ class FakeQueryBuilder<T> {
     return Promise.resolve({ [this.countAlias]: this.rows.length });
   }
 
-  then(onFulfilled: any, onRejected: any) {
+  then(onFulfilled?: (value: any) => any, onRejected?: (reason: any) => any): Promise<any> {
     return Promise.resolve(this.exec()).then(onFulfilled, onRejected);
   }
 

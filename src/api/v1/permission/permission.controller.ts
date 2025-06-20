@@ -15,11 +15,16 @@ export const getPermissions: RequestHandler = async (_req, res, next) => {
   try {
     const permissionService = container.resolve(PermissionService);
 
-    const { page, limit } = _req.query as unknown as GetPermissionsDTO;
-    const pageNumber = page ?? 1;
-    const limitNumber = limit ?? 10;
+    const { page: queryPage, limit: queryLimit } = _req.query as unknown as GetPermissionsDTO;
+    const pageNumber = queryPage ?? 1;
+    const limitNumber = queryLimit ?? 10;
 
-    const { permissions, total } = await permissionService.getPermissions(pageNumber, limitNumber);
+    const {
+      data,
+      total,
+      page: resultPage,
+      limit: resultLimit,
+    } = await permissionService.getPermissions(pageNumber, limitNumber);
 
     res.status(StatusCodes.OK).json(
       new ResponseBuilder()
@@ -27,11 +32,11 @@ export const getPermissions: RequestHandler = async (_req, res, next) => {
         .setStatusCode(StatusCodes.OK)
         .setMessage("Permissions retrieved successfully")
         .setData({
-          permissions,
+          permissions: data,
           pagination: {
-            page: pageNumber,
-            limit: limitNumber,
-            totalPages: Math.ceil(total / limitNumber),
+            page: resultPage,
+            limit: resultLimit,
+            totalPages: Math.ceil(total / resultLimit),
           },
         })
         .build(),

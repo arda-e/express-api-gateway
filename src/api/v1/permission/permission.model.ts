@@ -1,5 +1,5 @@
-import BaseModel from '@utils/Model';
-import { IsString, Min, Max, IsOptional } from 'class-validator';
+import BaseModel from "@utils/Model";
+import { IsString, Min, Max, IsOptional } from "class-validator";
 
 class Permission extends BaseModel {
   @IsString()
@@ -17,6 +17,16 @@ class Permission extends BaseModel {
     super(id);
     this.name = name;
     this.description = description;
+  }
+
+  public toRecord(): Record<string, any> {
+    return {
+      id: this.id,
+      name: this.name,
+      description: this.description,
+      created_at: this.created_at,
+      updated_at: this.updated_at,
+    };
   }
 }
 

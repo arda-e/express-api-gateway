@@ -1,12 +1,13 @@
 import "reflect-metadata";
 
 import { Paginated } from "../decorators/Paginated";
+import { PaginationResult } from "../pagination";
 
 describe("Paginated decorator", () => {
   class TestService {
     @Paginated()
-    async list(page?: number, limit?: number) {
-      return { data: [1, 2], total: 2 };
+    async list(page?: number, limit?: number): Promise<PaginationResult<number>> {
+      return { data: [1, 2], total: 2 } as any;
     }
   }
 
