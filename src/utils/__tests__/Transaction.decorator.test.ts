@@ -60,7 +60,7 @@ describe("Transaction and RequiresTransaction Decorators", () => {
   });
 
   it("throws when repository called without transaction", async () => {
-    await expect(repo.create("data" as any)).rejects.toThrow(
+    await expect(repo.create("data" as any, undefined as any)).rejects.toThrow(
       "Method create requires a transaction object as the last parameter",
     );
   });

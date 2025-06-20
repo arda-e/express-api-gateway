@@ -4,9 +4,9 @@ import session from "express-session";
 import request from "supertest";
 import { container } from "tsyringe";
 import { RoleActions } from "@utils/enums";
+import errorHandler from "@middlewares/errorHandler";
+import routeNotFound from "@middlewares/routeNotFound";
 
-import errorHandler from "@/middlewares/errorHandler";
-import routeNotFound from "@/middlewares/routeNotFound";
 import RoleService from "../role.service";
 
 jest.mock("@api/v1/auth", () => ({

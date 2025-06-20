@@ -1,5 +1,6 @@
 import { createLogger, format, transports, Logger } from "winston";
 import "winston-daily-rotate-file";
+import TransportStream from "winston-transport";
 
 /**
  * Provides a singleton logger factory for creating and managing a Winston logger instance.
@@ -15,7 +16,7 @@ class LoggerFactory {
    * @private
    * */
   private static createAsyncLogger(): Logger {
-    const transportList = [
+    const transportList: TransportStream[] = [
       new transports.Console({
         handleExceptions: true,
       }),
@@ -30,12 +31,16 @@ class LoggerFactory {
     ];
 
     if (process.env.ANALYTICS_ENABLED === "true" && process.env.ANALYTICS_URL) {
+      const analyticsUrl = new URL(process.env.ANALYTICS_URL);
       transportList.push(
         new transports.Http({
           level: process.env.ANALYTICS_LOG_LEVEL || "info",
-          url: process.env.ANALYTICS_URL,
+          host: analyticsUrl.hostname,
+          port: Number(analyticsUrl.port) || (analyticsUrl.protocol === "https:" ? 443 : 80),
+          path: analyticsUrl.pathname,
+          ssl: analyticsUrl.protocol === "https:",
           handleExceptions: true,
-        }),
+        }) as unknown as TransportStream,
       );
     }
 
