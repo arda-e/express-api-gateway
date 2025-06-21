@@ -11,6 +11,8 @@ FROM build AS development
 RUN npm install -g tsx knex @types/node
 ENV NODE_ENV=development
 EXPOSE 8000 9229
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+  CMD curl -f http://localhost:${PORT:-8000}/health/ready || exit 1
 CMD ["./scripts/wait-for-it.sh", "postgres:5432", "--", "sh", "-c", "./scripts/docker/prepare.sh ./scripts/docker/start-app.sh"]
 
 # Production Stage
@@ -33,4 +35,5 @@ EXPOSE 8000
 USER node
 
 CMD ["./scripts/wait-for-it.sh", "postgres:5432", "--", "node", "dist/index.js"]
+
 
