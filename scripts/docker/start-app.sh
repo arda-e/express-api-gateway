@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 set -e
 
+# Load secrets if present
+if [ -f /run/secrets/app_env ]; then
+  set -a
+  . /run/secrets/app_env
+  set +a
+fi
+
 # Wait for dependencies
 ./scripts/wait-for-it.sh postgres:5432 -- echo "Postgres is up"
 ./scripts/wait-for-it.sh redis:6379 -- echo "Redis is up"

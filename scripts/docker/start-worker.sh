@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 set -e
 
+# Load secrets if present
+if [ -f /run/secrets/app_env ]; then
+  set -a
+  . /run/secrets/app_env
+  set +a
+fi
+
 chmod +x /wait-for-it.sh
 
 # Wait for dependencies
