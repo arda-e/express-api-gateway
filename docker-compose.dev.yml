@@ -15,8 +15,12 @@ services:
       - .:/usr/src/app
       - ./dist/client:/usr/src/app/dist/client
       - ./scripts/wait-for-it.sh:/wait-for-it.sh
-    env_file:
-      - .env
+    secrets:
+      - app_env
+    environment:
+      - NODE_ENV=development
+      - $(cat /run/secrets/app_env | grep SECRET_KEY | cut -d '=' -f1)=\
+        $(cat /run/secrets/app_env | grep SECRET_KEY | cut -d '=' -f2)
     entrypoint: ./scripts/docker/start-app.sh
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:${DEV_PORT:-8000}/health/ready || exit 1"]
@@ -43,8 +47,12 @@ services:
       - ./dist/client:/usr/src/app/dist/client
       - ./scripts/wait-for-it.sh:/wait-for-it.sh
       - ./scripts/docker/start-worker.sh:/start-worker.sh
-    env_file:
-      - .env
+    secrets:
+      - app_env
+    environment:
+      - NODE_ENV=development
+      - $(cat /run/secrets/app_env | grep SECRET_KEY | cut -d '=' -f1)=\
+        $(cat /run/secrets/app_env | grep SECRET_KEY | cut -d '=' -f2)
     entrypoint: /start-worker.sh
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://express:${DEV_PORT:-8000}/health/ready || exit 1"]
@@ -65,8 +73,8 @@ services:
     image: "postgres:alpine"
     ports:
       - "5432:5432"
-    env_file:
-      - .env
+    secrets:
+      - app_env
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
       interval: 30s
@@ -80,8 +88,8 @@ services:
     image: "redis:alpine"
     ports:
       - "${REDIS_PORT:-6379}:${REDIS_PORT:-6379}"
-    env_file:
-      - .env
+    secrets:
+      - app_env
     healthcheck:
       test: ["CMD-SHELL", "redis-cli -h localhost ping | grep -q PONG"]
       interval: 30s
@@ -141,4 +149,8 @@ networks:
 volumes:
   esdata:
     driver: local
+
+secrets:
+  app_env:
+    file: .env # docker secret create app_env .env
 

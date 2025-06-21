@@ -168,6 +168,12 @@ For building the production environment:
 docker-compose -f docker-compose.prod.yml up --build
 ```
 
+Before starting, create the secret containing your environment variables:
+
+```bash
+docker secret create app_env .env.prod
+```
+
 ### Analytics Dashboard
 
 The Docker Compose files include `elasticsearch` and `kibana` services.

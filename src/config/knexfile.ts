@@ -1,17 +1,11 @@
 import type { Knex } from "knex";
-import dotenvFlow from "dotenv-flow";
 
-dotenvFlow.config();
+import ConfigService from "./ConfigService";
 
-const config: { [key: string]: Knex.Config } = {
+const knexConfig: { [key: string]: Knex.Config } = {
   development: {
     client: "pg",
-    connection: {
-      host: process.env.POSTGRES_HOST,
-      user: process.env.POSTGRES_USER,
-      password: process.env.POSTGRES_PASSWORD,
-      database: process.env.POSTGRES_DB,
-    },
+    connection: ConfigService.knex,
     migrations: {
       directory: "../migrations",
       extension: "ts",
@@ -23,12 +17,7 @@ const config: { [key: string]: Knex.Config } = {
   },
   production: {
     client: "pg",
-    connection: {
-      host: process.env.POSTGRES_HOST,
-      user: process.env.POSTGRES_USER,
-      password: process.env.POSTGRES_PASSWORD,
-      database: process.env.POSTGRES_DB,
-    },
+    connection: ConfigService.knex,
     migrations: {
       directory: "./dist/migrations",
       extension: "js",
@@ -40,4 +29,4 @@ const config: { [key: string]: Knex.Config } = {
   },
 };
 
-export default config;
+export default knexConfig;

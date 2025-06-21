@@ -1,9 +1,10 @@
-import knex, { Knex } from 'knex';
-import knexConfig from '@config/knexfile';
+import knex, { Knex } from "knex";
+import knexConfig from "@config/knexfile";
+import ConfigService from "@config/ConfigService";
 
-import DbAdapter from './db.adapter';
+import DbAdapter from "./db.adapter";
 
-const environment = process.env.NODE_ENV || 'development';
+const environment = ConfigService.nodeEnv || "development";
 const environmentConfig = knexConfig[environment];
 
 /**
@@ -28,7 +29,7 @@ class KnexAdapter extends DbAdapter<Knex> {
    * @throws Error if the connection test fails.
    */
   protected async testConnection(): Promise<void> {
-    await this.instance!.raw('SELECT 1');
+    await this.instance!.raw("SELECT 1");
   }
 
   //!TODO: Check if this method is going to be used anywhere if not delete method
@@ -45,7 +46,7 @@ class KnexAdapter extends DbAdapter<Knex> {
    */
   async query(queryString: string, params: any[] = []): Promise<any> {
     if (!this.instance) {
-      throw new Error('Knex has not been initialized. Call initialize first.');
+      throw new Error("Knex has not been initialized. Call initialize first.");
     }
     return this.instance.raw(queryString, params);
   }
