@@ -1,5 +1,5 @@
 //** EXTERNAL LIBRARIES
-import { inject, injectable } from "tsyringe";
+import { container, inject, injectable } from "tsyringe";
 import { Knex } from "knex";
 //** INTERNAL UTILS
 import DatabaseManager from "@db/db.manager";
@@ -13,7 +13,7 @@ import { RoleRepository } from "@api/v1/role/repositories";
 @injectable()
 class RoleUserRepository extends KnexRepository<RoleUser> {
   constructor(
-    @inject(AuthRepository) private authRepository: AuthRepository,
+    // AuthRepository is resolved lazily in getter to avoid circular dependency
     @inject(RoleRepository) private roleRepository: RoleRepository,
     @inject(DatabaseManager) protected databaseManager: DatabaseManager,
   ) {
@@ -90,6 +90,13 @@ class RoleUserRepository extends KnexRepository<RoleUser> {
     if (!role) {
       throw new ResourceDoesNotExistError("Role not found");
     }
+  }
+
+  /**
+   * Lazily resolves AuthRepository to avoid circular import issues at load time.
+   */
+  private get authRepository(): AuthRepository {
+    return container.resolve(AuthRepository);
   }
 }
 

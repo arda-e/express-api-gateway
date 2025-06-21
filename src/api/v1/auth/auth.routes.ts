@@ -11,7 +11,11 @@ const authController = container.resolve(AuthController);
 
 // Public routes (no authentication required)
 router.post("/login", validateRequest(DTO.LoginUserRequestDTO), authController.login);
-router.post("/register", validateRequest(DTO.RegisterUserRequestDTO), authController.register);
+router.post(
+  "/register",
+  validateRequest(DTO.RegisterUserRequestDTO),
+  authController.register.bind(authController),
+);
 router.post(
   "/verify-email",
   validateRequest(DTO.VerifyEmailRequestDTO),

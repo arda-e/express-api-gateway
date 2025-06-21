@@ -1,4 +1,5 @@
 import { IsEmail, IsOptional, IsString, Length } from "class-validator";
+import { Expose } from "class-transformer";
 
 /**
  * @swagger
@@ -20,6 +21,7 @@ import { IsEmail, IsOptional, IsString, Length } from "class-validator";
  *           example: hunter2
  */
 export class LoginUserRequestDTO {
+  @Expose()
   @IsEmail({}, { message: "Please enter a valid email address" })
   email: string;
 
@@ -52,13 +54,16 @@ export class LoginUserRequestDTO {
  *           example: hunter2
  */
 export class RegisterUserRequestDTO {
+  @Expose()
   @IsString()
   @Length(3, undefined, { message: "Username must be at least 3 characters long" })
   username: string;
 
+  @Expose()
   @IsEmail({}, { message: "Please enter a valid email address" })
   email: string;
 
+  @Expose()
   @IsString()
   @Length(6, undefined, { message: "Password must be at least 6 characters long" })
   password: string;
