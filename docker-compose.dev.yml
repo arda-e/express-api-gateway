@@ -18,6 +18,13 @@ services:
     env_file:
       - .env
     entrypoint: ./scripts/docker/start-app.sh
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:${DEV_PORT:-8000}/health/ready || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: on-failure
     depends_on:
       - db
       - redis
@@ -39,6 +46,13 @@ services:
     env_file:
       - .env
     entrypoint: /start-worker.sh
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://express:${DEV_PORT:-8000}/health/ready || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: on-failure
     depends_on:
       - express
       - db
@@ -53,6 +67,11 @@ services:
       - "5432:5432"
     env_file:
       - .env
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 30s
+      retries: 5
+    restart: on-failure
     networks:
       - express-gateway-network
 
@@ -63,6 +82,12 @@ services:
       - "${REDIS_PORT:-6379}:${REDIS_PORT:-6379}"
     env_file:
       - .env
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -h localhost ping | grep -q PONG"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    restart: on-failure
     networks:
       - express-gateway-network
 
@@ -97,6 +122,13 @@ services:
       - ./scripts/wait-for-it.sh:/wait-for-it.sh
       - ./scripts/docker/start-kibana.sh:/start-kibana.sh
     entrypoint: /start-kibana.sh
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5601/api/status || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    restart: on-failure
     depends_on:
       - elasticsearch
     networks:

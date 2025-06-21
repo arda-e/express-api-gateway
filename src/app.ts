@@ -6,12 +6,16 @@ import LoggerFactory from "@utils/Logger";
 
 import * as middlewares from "./middlewares";
 import { api_v1 } from "./api/v1/";
+import { healthRouter } from "./health";
 
 const app = express();
 const logger = LoggerFactory.getLogger();
 
 app.use(express.json());
 app.use(middlewares.logger);
+
+// Mount health routes before other middleware
+app.use(healthRouter);
 
 app.use(getSessionMiddleware());
 setupSwagger(app);
