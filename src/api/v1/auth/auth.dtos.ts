@@ -1,5 +1,6 @@
 import { IsEmail, IsOptional, IsString, Length } from "class-validator";
-import { Expose } from "class-transformer";
+import { Expose, Transform } from "class-transformer";
+import sanitizeHtml from "sanitize-html";
 
 /**
  * @swagger
@@ -55,6 +56,7 @@ export class LoginUserRequestDTO {
  */
 export class RegisterUserRequestDTO {
   @Expose()
+  @Transform(({ value }) => sanitizeHtml(value))
   @IsString()
   @Length(3, undefined, { message: "Username must be at least 3 characters long" })
   username: string;
