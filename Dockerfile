@@ -16,15 +16,24 @@ HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
 CMD ["./scripts/wait-for-it.sh", "postgres:5432", "--", "sh", "-c", "./scripts/docker/prepare.sh ./scripts/docker/start-app.sh"]
 
 # Production Stage
-FROM node:18-slim AS production
+# Use the Alpine variant for a smaller final image
+FROM node:18-alpine AS production
 WORKDIR /usr/src/app
 ENV NODE_ENV=production
-COPY package*.json ./
+
+# Copy only lock files for reliable, cached installs
+COPY --chown=node:node package*.json ./
 RUN npm ci --omit=dev
-COPY --from=build /usr/src/app/dist ./dist
-COPY scripts/wait-for-it.sh ./scripts/wait-for-it.sh
+
+# Copy the compiled output only
+COPY --from=build --chown=node:node /usr/src/app/dist ./dist
+COPY --chown=node:node scripts/wait-for-it.sh ./scripts/wait-for-it.sh
+
 EXPOSE 8000
-HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
-  CMD curl -f http://localhost:${PORT:-8000}/health/ready || exit 1
-CMD ["./scripts/wait-for-it.sh", "postgres:5432", "--", "sh", "-c", "./scripts/docker/start-app.sh"]
+
+# Drop root privileges for security
+USER node
+
+CMD ["./scripts/wait-for-it.sh", "postgres:5432", "--", "node", "dist/index.js"]
+
 
