@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { authRequired } from "@middlewares";
 
 import { authRoutes } from "./auth";
 import { roleRoutes } from "./role";
@@ -13,6 +14,9 @@ router.get("/", (req, res) => {
 });
 
 router.use("/auth", authRoutes);
+
+router.use(authRequired);
+
 router.use("/role", roleRoutes);
 router.use("/permission", permissionRoutes);
 router.use("/queue", queueRoutes);

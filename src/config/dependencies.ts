@@ -58,17 +58,13 @@ export const initializeAppDependencies = (): void => {
       },
     });
     // Register QueueService
-    container.register(QueueService, {
-      useClass: QueueService,
-    });
+    container.registerSingleton(QueueService);
     // Register QueueController
-    container.register(QueueController, {
-      useClass: QueueController,
-    });
-    container.resolve(DatabaseManager);
-    container.resolve(VerificationTokenRepository);
-    container.resolve(AuthRepository);
-    container.resolve(AuthService);
+    container.registerSingleton(QueueController);
+    container.registerSingleton(DatabaseManager);
+    container.registerSingleton(VerificationTokenRepository);
+    container.registerSingleton(AuthRepository);
+    container.registerSingleton(AuthService);
     logger.info("Application dependencies initialized successfully.");
   } catch (error) {
     logger.error("Failed to initialize application dependencies:", error);

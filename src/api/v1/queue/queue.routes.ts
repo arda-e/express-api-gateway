@@ -9,12 +9,13 @@ const router = Router();
 const queueController = container.resolve(QueueController);
 
 // All queue routes require authentication
+
 router.use(authRequired);
 
 router.get("/items", queueController.getAllItemsInQueue);
 router.post("/requeue", queueController.requeueFromDLQ);
-router.get("/dashboard", (req, res) => {
-  const html = render();
+router.get("/dashboard", async (req, res) => {
+  const html = await render(req.url);
   res.send(`
     <!DOCTYPE html>
     <html>

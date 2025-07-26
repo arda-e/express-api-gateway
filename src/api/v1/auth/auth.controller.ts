@@ -11,13 +11,15 @@ import { AuthService } from "@api/v1/auth";
 import * as DTO from "./auth.dtos";
 import { UserModel } from "./auth.model";
 
-@Controller({ logging: true, benchmarking: true })
 @injectable()
+@Controller({ logging: true, benchmarking: true })
 export class AuthController {
   constructor(
     /* injected with delay to prevent circular dependencies */
     @inject(delay(() => AuthService)) private authService: AuthService,
-  ) {}
+  ) {
+    console.log("[DI Test] authService is", this.authService);
+  }
 
   /**
    * @openapi
@@ -64,6 +66,7 @@ export class AuthController {
     res: Response,
     next: NextFunction,
   ): Promise<ApiResponse<UserModel>> {
+    console.log("[DI test]", this instanceof AuthController, this.authService);
     const { username, email, password } = req.body as DTO.RegisterUserRequestDTO;
 
     const user = await this.authService.register(username, email, password);

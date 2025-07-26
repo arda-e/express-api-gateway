@@ -7,6 +7,7 @@ import LoggerFactory from "@utils/Logger";
 import * as middlewares from "./middlewares";
 import { api_v1 } from "./api/v1/";
 import { healthRouter } from "./health";
+import { render } from "./ui/entry-server";
 
 const app = express();
 const logger = LoggerFactory.getLogger();
@@ -33,6 +34,37 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/v1", api_v1);
+
+const ssrPaths = ["/", "/login", "/admin"];
+
+app.get("*", async (req, res, next) => {
+  try {
+    if (!ssrPaths.some((p) => req.path.startsWith(p))) {
+      return next(); // unknown path → routeNotFound
+    }
+
+    const htmlContent = await render(req.url);
+    res.status(200).send(`
+      <!DOCTYPE html>
+      <html lang="en">
+        <head>
+          <meta charset="UTF-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <link rel="stylesheet" href="/public/styles.css" />
+          <title>Admin UI</title>
+        </head>
+        <body>
+          <div id="root">${htmlContent}</div>
+          <script type="module" src="/static/entry-client.js"></script>
+        </body>
+      </html>
+    `);
+  } catch (error) {
+    console.error("SSR rendering error:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
 app.use(middlewares.errorHandler);
 app.use(middlewares.routeNotFound);
 
